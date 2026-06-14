@@ -27,7 +27,7 @@ try {
   if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
     const serviceAccountPath = path.isAbsolute(process.env.FIREBASE_SERVICE_ACCOUNT_PATH)
       ? process.env.FIREBASE_SERVICE_ACCOUNT_PATH
-      : path.resolve(__dirname, process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
+      : path.resolve(__dirname, '..', process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
 
     const serviceAccountRaw = await readFile(serviceAccountPath, 'utf8');
     const serviceAccount = JSON.parse(serviceAccountRaw);
@@ -45,14 +45,14 @@ try {
     });
   } else {
     try {
-      const keyPath = path.resolve(__dirname, './serviceAccountKey.json');
+      const keyPath = path.resolve(__dirname, '..', 'serviceAccountKey.json');
       const serviceAccountRaw = await readFile(keyPath, 'utf8');
       const serviceAccount = JSON.parse(serviceAccountRaw);
 
       initializeApp({
         credential: cert(serviceAccount),
       });
-    } catch  {
+    } catch (innerError) {
       throw new Error('Firebase credentials not found. Please set up environment variables or provide serviceAccountKey.json');
     }
   }
@@ -62,7 +62,7 @@ try {
 } catch (error) {
   console.error('✗ Firebase initialization failed:', error.message);
   console.error('The backend server requires Firebase Admin credentials.');
-  console.error('See FIREBASE_SETUP.md for configuration instructions.');
+  console.error('See ../FIREBASE_SETUP.md for configuration instructions.');
   process.exit(1);
 }
 
@@ -122,7 +122,7 @@ const getDailyLogs = async (userId) => {
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Firebase backend is running' });
+  res.json({ status: 'ok', message: 'SmartFoodSave backend is running' });
 });
 
 // Backend login proxy using Firebase Auth REST API
@@ -360,4 +360,6 @@ app.post('/api/recommendations', authenticate, async (req, res) => {
 app.listen(PORT, () => {
   console.log(`✓ SmartFoodSave Backend running on port ${PORT}`);
   console.log('✓ Connected to Firestore');
+  console.log(`✓ Serving both web (site/) and mobile (mobile_app/) clients`);
+  console.log(`✓ Base URL: http://localhost:${PORT}`);
 });

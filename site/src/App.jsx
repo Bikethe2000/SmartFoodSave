@@ -27,13 +27,18 @@ export default function App() {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
+  const [isSignup, setIsSignup] = useState(false);
 
-  const handleLogin = async (e) => {
+  const handleAuthSubmit = async (e) => {
     e.preventDefault();
     setLoginError('');
     setLoginLoading(true);
     try {
-      await api.login(email, password);
+      if (isSignup) {
+        await api.signup(email, password);
+      } else {
+        await api.login(email, password);
+      }
       setIsAuthenticated(true);
     } catch (err) {
       setLoginError(err.message || 'Invalid login details.');
@@ -60,7 +65,7 @@ export default function App() {
             <p className="text-sm text-slate-400">Cafeteria Management Login Dashboard</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleAuthSubmit} className="space-y-4">
             {loginError && (
               <div className="p-3.5 bg-red-50 border border-red-100 rounded-xl text-xs font-semibold text-red-700">
                 {loginError}
@@ -104,8 +109,19 @@ export default function App() {
             >
               {loginLoading ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              ) : 'Sign In'}
+              ) : isSignup ? 'Sign Up' : 'Sign In'}
             </button>
+
+            <div className="text-center text-sm text-slate-500 mt-2">
+              {isSignup ? 'Already have an account?' : 'Need a new account?'}{' '}
+              <button
+                type="button"
+                onClick={() => setIsSignup(!isSignup)}
+                className="font-semibold text-emerald-600 hover:text-emerald-700"
+              >
+                {isSignup ? 'Sign In' : 'Sign Up'}
+              </button>
+            </div>
           </form>
         </div>
       </div>

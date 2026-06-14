@@ -5,14 +5,14 @@ import { getFirestore } from 'firebase/firestore';
 // TODO: Replace these with your Firebase config from Firebase Console
 // Go to Firebase Console > Project Settings > Your apps > Copy the config
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyC4u_WycoDv84P0dqzQtV0y2JD9n0du8-k",
+  authDomain: "foodwasteai-8d074.firebaseapp.com",
+  projectId: "foodwasteai-8d074",
+  storageBucket: "foodwasteai-8d074.firebasestorage.app",
+  messagingSenderId: "298988180962",
+  appId: "1:298988180962:web:bb885bbefa2d3084e895bb",
+  measurementId: "G-R5324SN97G"
 };
-
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
