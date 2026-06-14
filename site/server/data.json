@@ -1,0 +1,128 @@
+{
+  "predictions": [
+    {
+      "id": "pred-1",
+      "date": "2026-06-15",
+      "menuItems": [
+        "Pasta Carbonara",
+        "Caesar Salad"
+      ],
+      "predictedWasteKg": 12.5,
+      "riskLevel": "High",
+      "confidence": 0.85,
+      "explanation": "Historically high leftovers on pasta days + forecasted low attendance due to warm weather."
+    },
+    {
+      "id": "pred-2",
+      "date": "2026-06-16",
+      "menuItems": [
+        "Chicken Wraps",
+        "Fruit Salad"
+      ],
+      "predictedWasteKg": 3.2,
+      "riskLevel": "Low",
+      "confidence": 0.92,
+      "explanation": "Highly popular menu item. Historical logs show student participation is at 95% on wrap days."
+    },
+    {
+      "id": "pred-3",
+      "date": "2026-06-17",
+      "menuItems": [
+        "Beef Tacos",
+        "Refried Beans"
+      ],
+      "predictedWasteKg": 7.8,
+      "riskLevel": "Medium",
+      "confidence": 0.78,
+      "explanation": "Moderate leftovers expected. Tacos are popular but side portions are often over-prepared."
+    },
+    {
+      "id": "pred-4",
+      "date": "2026-06-18",
+      "menuItems": [
+        "Vegetable Soup",
+        "Garlic Bread"
+      ],
+      "predictedWasteKg": 10.4,
+      "riskLevel": "High",
+      "confidence": 0.8,
+      "explanation": "Soup days historically have higher plate waste from younger grade levels."
+    },
+    {
+      "id": "pred-5",
+      "date": "2026-06-19",
+      "menuItems": [
+        "Fish Nuggets",
+        "French Fries"
+      ],
+      "predictedWasteKg": 5.1,
+      "riskLevel": "Low",
+      "confidence": 0.89,
+      "explanation": "High attendance expected as it is the final day before the weekend."
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "rec-1",
+      "title": "Reduce pasta portion size by 15%",
+      "description": "Pasta Carbonara shows consistently high plate leftovers. Adjusting the portion size slightly reduces waste without affecting student satisfaction.",
+      "suggestedChange": "Reduce portions by 15%",
+      "impactKg": 3.2,
+      "confidence": 0.88,
+      "status": "accepted"
+    },
+    {
+      "id": "rec-2",
+      "title": "Prepare 10% fewer soup bowls",
+      "description": "Our AI model predicts a drop in attendance on Thursday. Pre-serving fewer bowls saves soup for next-day repurposing.",
+      "suggestedChange": "Prepare 10% fewer portions",
+      "impactKg": 2.5,
+      "confidence": 0.78,
+      "status": "pending"
+    },
+    {
+      "id": "rec-3",
+      "title": "Switch garlic bread to self-serve basket",
+      "description": "Pre-plating bread leads to untouched slices being discarded. Let students take garlic bread as they pass the counter.",
+      "suggestedChange": "Change from pre-plated to self-serve basket",
+      "impactKg": 1.8,
+      "confidence": 0.92,
+      "status": "pending"
+    }
+  ],
+  "dailyLogs": [
+    {
+      "id": "log-1",
+      "date": "2026-06-12",
+      "menuItems": [
+        "Pizza Slice",
+        "Green Salad"
+      ],
+      "prepared": 150,
+      "served": 142,
+      "leftovers": 8
+    },
+    {
+      "id": "log-2",
+      "date": "2026-06-13",
+      "menuItems": [
+        "Turkey Burger",
+        "Carrot Sticks"
+      ],
+      "prepared": 130,
+      "served": 110,
+      "leftovers": 20
+    },
+    {
+      "id": "log-3",
+      "date": "2026-06-14",
+      "menuItems": [
+        "Chicken Wrap",
+        "Apple Slices"
+      ],
+      "prepared": 120,
+      "served": 95,
+      "leftovers": 25
+    }
+  ]
+}
