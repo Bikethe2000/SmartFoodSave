@@ -1,73 +1,229 @@
-const BASE_URL = 'http://localhost:5000/api';
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+} from 'firebase/auth';
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  getDoc,
+  doc,
+  addDoc,
+  updateDoc,
+  onSnapshot,
+} from 'firebase/firestore';
+import { auth, db } from './firebase';
 
-// Helper to handle fetch responses
-async function request(path, options = {}) {
-  const token = localStorage.getItem('sfs_token');
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-    ...options.headers,
-  };
+let currentUser = null;
 
-  const response = await fetch(`${BASE_URL}${path}`, {
-    ...options,
-    headers,
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-  }
-
-  return response.json();
-}
+// Monitor auth state
+onAuthStateChanged(auth, (user) => {
+  currentUser = user;
+});
 
 export const api = {
+  // Authentication Methods
   login: async (email, password) => {
-    const res = await request('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
-    if (res.token) {
-      localStorage.setItem('sfs_token', res.token);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      return { user: userCredential.user, token: await userCredential.user.getIdToken() };
+    } catch (error) {
+      throw new Error(error.message || 'Login failed');
     }
-    return res;
   },
 
-  logout: () => {
-    localStorage.removeItem('sfs_token');
+  signup: async (email, password) => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      return { user: userCredential.user, token: await userCredential.user.getIdToken() };
+    } catch (error) {
+      throw new Error(error.message || 'Signup failed');
+    }
+  },
+
+  logout: async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      throw new Error(error.message || 'Logout failed');
+    }
   },
 
   isAuthenticated: () => {
-    return !!localStorage.getItem('sfs_token');
+    return !!currentUser;
   },
 
-  getWeeklyWaste: () => request('/stats/weekly-waste'),
-  
-  getUpcomingPredictions: () => request('/predictions/upcoming'),
-  
-  getTodayRecommendations: () => request('/recommendations/today'),
-  
-  getPredictions: (from, to) => {
-    let query = '';
-    if (from && to) {
-      query = `?from=${from}&to=${to}`;
+  getCurrentUser: () => currentUser,
+
+  // Stats Methods
+  getWeeklyWaste: async () => {
+    try {
+      const q = query(collection(db, 'dailyLogs'), where('userId', '==', currentUser?.uid || ''));
+      const snapshot = await getDocs(q);
+      const logs = snapshot.docs.map(doc => doc.data());
+      
+      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+      return logs.slice(-5).map((log, index) => {
+        const wasteKg = parseFloat((log.leftovers * 0.2).toFixed(1));
+        return {
+          day: days[index % days.length],
+          waste: wasteKg,
+          portions: log.leftovers
+        };
+      });
+    } catch (error) {
+      console.error('Error fetching weekly waste:', error);
+      throw error;
     }
-    return request(`/predictions${query}`);
   },
-  
-  getPredictionDetails: (id) => request(`/predictions/${id}`),
-  
-  getRecommendations: () => request('/recommendations'),
-  
-  acceptRecommendation: (id) => request(`/recommendations/${id}/accept`, { method: 'POST' }),
-  
-  ignoreRecommendation: (id) => request(`/recommendations/${id}/ignore`, { method: 'POST' }),
-  
-  getDailyLogs: () => request('/data/daily-logs'),
-  
-  addDailyLog: (logData) => request('/data/daily-logs', {
-    method: 'POST',
-    body: JSON.stringify(logData),
-  }),
+
+  // Predictions Methods
+  getUpcomingPredictions: async () => {
+    try {
+      const q = query(
+        collection(db, 'predictions'),
+        where('userId', '==', currentUser?.uid || '')
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(p => p.riskLevel === 'High' || p.riskLevel === 'Medium');
+    } catch (error) {
+      console.error('Error fetching upcoming predictions:', error);
+      throw error;
+    }
+  },
+
+  getPredictions: async (from, to) => {
+    try {
+      const q = query(collection(db, 'predictions'), where('userId', '==', currentUser?.uid || ''));
+      const snapshot = await getDocs(q);
+      let predictions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      if (from && to) {
+        predictions = predictions.filter(p => p.date >= from && p.date <= to);
+      }
+      return predictions;
+    } catch (error) {
+      console.error('Error fetching predictions:', error);
+      throw error;
+    }
+  },
+
+  getPredictionDetails: async (id) => {
+    try {
+      const docRef = doc(db, 'predictions', id);
+      const snapshot = await getDoc(docRef);
+      if (snapshot.exists()) {
+        return { id: snapshot.id, ...snapshot.data() };
+      }
+      throw new Error('Prediction not found');
+    } catch (error) {
+      console.error('Error fetching prediction details:', error);
+      throw error;
+    }
+  },
+
+  // Recommendations Methods
+  getTodayRecommendations: async () => {
+    try {
+      const q = query(
+        collection(db, 'recommendations'),
+        where('userId', '==', currentUser?.uid || ''),
+        where('status', '==', 'pending')
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .slice(0, 3);
+    } catch (error) {
+      console.error('Error fetching today recommendations:', error);
+      throw error;
+    }
+  },
+
+  getRecommendations: async () => {
+    try {
+      const q = query(collection(db, 'recommendations'), where('userId', '==', currentUser?.uid || ''));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error fetching recommendations:', error);
+      throw error;
+    }
+  },
+
+  acceptRecommendation: async (id) => {
+    try {
+      const docRef = doc(db, 'recommendations', id);
+      await updateDoc(docRef, { status: 'accepted' });
+      return { success: true };
+    } catch (error) {
+      console.error('Error accepting recommendation:', error);
+      throw error;
+    }
+  },
+
+  ignoreRecommendation: async (id) => {
+    try {
+      const docRef = doc(db, 'recommendations', id);
+      await updateDoc(docRef, { status: 'ignored' });
+      return { success: true };
+    } catch (error) {
+      console.error('Error ignoring recommendation:', error);
+      throw error;
+    }
+  },
+
+  // Data Logs Methods
+  getDailyLogs: async () => {
+    try {
+      const q = query(collection(db, 'dailyLogs'), where('userId', '==', currentUser?.uid || ''));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error fetching daily logs:', error);
+      throw error;
+    }
+  },
+
+  addDailyLog: async (logData) => {
+    try {
+      const docRef = await addDoc(collection(db, 'dailyLogs'), {
+        ...logData,
+        userId: currentUser?.uid || '',
+        createdAt: new Date(),
+      });
+      return { id: docRef.id, ...logData };
+    } catch (error) {
+      console.error('Error adding daily log:', error);
+      throw error;
+    }
+  },
+
+  // Real-time subscription methods
+  subscribeToPredictions: (callback) => {
+    const q = query(collection(db, 'predictions'), where('userId', '==', currentUser?.uid || ''));
+    return onSnapshot(q, (snapshot) => {
+      const predictions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      callback(predictions);
+    }, (error) => {
+      console.error('Error in predictions subscription:', error);
+      callback([]);
+    });
+  },
+
+  subscribeToRecommendations: (callback) => {
+    const q = query(collection(db, 'recommendations'), where('userId', '==', currentUser?.uid || ''));
+    return onSnapshot(q, (snapshot) => {
+      const recommendations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      callback(recommendations);
+    }, (error) => {
+      console.error('Error in recommendations subscription:', error);
+      callback([]);
+    });
+  },
 };
