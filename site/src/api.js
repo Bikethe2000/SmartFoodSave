@@ -123,4 +123,18 @@ export const api = {
       body: logData,
     });
   },
+
+  addPrediction: async (predictionData) => {
+    return fetchWithAuth('/predictions', {
+      method: 'POST',
+      body: predictionData,
+    });
+  },
+
+  addRecommendation: async (recommendationData) => {
+    return fetchWithAuth('/recommendations', {
+      method: 'POST',
+      body: recommendationData,
+    });
+  },
 };
