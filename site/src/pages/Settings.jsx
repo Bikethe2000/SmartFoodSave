@@ -1,35 +1,105 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Settings as SettingsIcon, Save, ToggleLeft, ToggleRight, Sparkles } from 'lucide-react';
+import { auth } from "../firebase";
 
 export default function Settings({ showConfidenceRanges, setShowConfidenceRanges }) {
-  const [schoolName, setSchoolName] = useState('Greenwood High School');
-  const [studentCount, setStudentCount] = useState('450');
-  const [portionSize, setPortionSize] = useState('0.25 kg');
+  const [schoolName, setSchoolName] = useState('');
+  const [studentCount, setStudentCount] = useState('');
+  const [portionSize, setPortionSize] = useState('');
   const [timezone, setTimezone] = useState('GMT+3');
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Load from localStorage if present
-  useEffect(() => {
-    const cachedName = localStorage.getItem('sfs_school_name');
-    const cachedCount = localStorage.getItem('sfs_student_count');
-    const cachedPortion = localStorage.getItem('sfs_portion_size');
-    const cachedTimezone = localStorage.getItem('sfs_timezone');
-    
-    if (cachedName) setSchoolName(cachedName);
-    if (cachedCount) setStudentCount(cachedCount);
-    if (cachedPortion) setPortionSize(cachedPortion);
-    if (cachedTimezone) setTimezone(cachedTimezone);
-  }, []);
-
-  const handleSave = (e) => {
-    e.preventDefault();
-    localStorage.setItem('sfs_school_name', schoolName);
-    localStorage.setItem('sfs_student_count', studentCount);
-    localStorage.setItem('sfs_portion_size', portionSize);
-    localStorage.setItem('sfs_timezone', timezone);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+  const getToken = async () => {
+    const user = auth.currentUser;
+    if (!user) return null;
+    return await user.getIdToken();
   };
+
+  // -----------------------------
+  // LOAD SETTINGS FROM BACKEND
+  // -----------------------------
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const token = await getToken();
+        if (!token) {
+          console.warn("No auth token available");
+          return;
+        }
+
+        const res = await fetch("/api/settings", {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+
+        if (!res.ok) {
+          console.error("Failed to load settings", await res.text());
+          return;
+        }
+
+        const data = await res.json();
+
+        setSchoolName(data.schoolName || "");
+        setStudentCount(data.studentCount || "");
+        setPortionSize(data.portionSize || "");
+        setTimezone(data.timezone || "GMT+3");
+        setShowConfidenceRanges(data.showConfidenceRanges || false);
+
+      } catch (err) {
+        console.error("Failed to load settings:", err);
+      }
+
+      setLoading(false);
+    }
+
+    loadSettings();
+  }, [setShowConfidenceRanges]);
+
+  // -----------------------------
+  // SAVE SETTINGS TO BACKEND
+  // -----------------------------
+  const handleSave = async (e) => {
+    e.preventDefault();
+
+    try {
+      const token = await getToken();
+      if (!token) {
+        console.warn("No auth token available");
+        return;
+      }
+
+      await fetch("/api/settings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          schoolName,
+          studentCount,
+          portionSize,
+          timezone,
+          showConfidenceRanges
+        })
+      });
+
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+
+    } catch (err) {
+      console.error("Failed to save settings:", err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-2xl mx-auto text-center py-10 text-slate-500">
+        Loading settings...
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">

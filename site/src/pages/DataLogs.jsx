@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '../api';
 import { 
   Plus, 
   History, 
   Info, 
-  Sparkles,
   ClipboardList,
   Calendar
 } from 'lucide-react';
+
+
 
 export default function DataLogs() {
   const [logs, setLogs] = useState([]);
@@ -17,6 +18,7 @@ export default function DataLogs() {
   // Form state
   const [date, setDate] = useState('');
   const [menuItems, setMenuItems] = useState('');
+  const [attendance, setAttendance] = useState('');
   const [prepared, setPrepared] = useState('');
   const [served, setServed] = useState('');
   const [leftovers, setLeftovers] = useState('');
@@ -50,11 +52,18 @@ export default function DataLogs() {
     }
   }, [prepared, served]);
 
+  function getDayOfWeek(dateString) {
+    const date = new Date(dateString);
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    return days[date.getDay()];
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError('');
     setFormSuccess(false);
 
+    const dayOfWeek = getDayOfWeek(date);
     if (!date || !menuItems || !prepared || !served || !leftovers) {
       setFormError('All fields are required.');
       return;
@@ -62,8 +71,10 @@ export default function DataLogs() {
 
     try {
       await api.addDailyLog({
+        dayOfWeek,
         date,
         menuItems: menuItems.split(',').map(item => item.trim()),
+        attendance: parseInt(attendance),
         prepared: parseInt(prepared),
         served: parseInt(served),
         leftovers: parseInt(leftovers),
@@ -72,6 +83,7 @@ export default function DataLogs() {
       // Reset form
       setDate('');
       setMenuItems('');
+      setAttendance('');
       setPrepared('');
       setServed('');
       setLeftovers('');
@@ -84,6 +96,7 @@ export default function DataLogs() {
       setFormError('Failed to submit log entry.');
     }
   };
+
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -131,6 +144,17 @@ export default function DataLogs() {
                 placeholder="e.g. Pasta, Green Salad"
                 value={menuItems}
                 onChange={(e) => setMenuItems(e.target.value)}
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-emerald-500 text-slate-700 placeholder:text-slate-300"
+                required
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Attendance</label>
+              <input 
+                type="number"
+                placeholder="e.g. 150"
+                value={attendance}
+                onChange={(e) => setAttendance(e.target.value)}
                 className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-emerald-500 text-slate-700 placeholder:text-slate-300"
                 required
               />
@@ -221,10 +245,11 @@ export default function DataLogs() {
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-sm">
                     {logs.map(log => (
+                      
                       <tr key={log.id} className="hover:bg-slate-50/50 transition">
                         <td className="p-4 font-semibold text-slate-700 flex items-center gap-1.5 whitespace-nowrap">
                           <Calendar className="h-4 w-4 text-slate-400" />
-                          {log.date}
+                          {log.dayOfWeek ? `${log.dayOfWeek} — ${log.date}` : log.date}
                         </td>
                         <td className="p-4 text-slate-600 font-medium">
                           {log.menuItems.join(', ')}
@@ -232,6 +257,7 @@ export default function DataLogs() {
                         <td className="p-4 text-center text-slate-700 font-medium">{log.prepared}</td>
                         <td className="p-4 text-center text-slate-700 font-medium">{log.served}</td>
                         <td className="p-4 text-center font-bold text-emerald-600">{log.leftovers}</td>
+                        <td className="p-4 text-center text-slate-400 text-xs font-semibold">{(((log.prepared - log.served) / log.prepared) * 100).toFixed(1)}%</td>
                       </tr>
                     ))}
                   </tbody>
