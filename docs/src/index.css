@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  margin: 0;
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* Documentation specific styles */
+.doc-content h1 {
+  @apply text-3xl font-bold text-slate-900 mt-8 mb-4;
+}
+
+.doc-content h2 {
+  @apply text-2xl font-bold text-slate-900 mt-6 mb-3;
+}
+
+.doc-content h3 {
+  @apply text-xl font-semibold text-slate-900 mt-4 mb-2;
+}
+
+.doc-content p {
+  @apply text-base text-slate-700 mb-3 leading-relaxed;
+}
+
+.doc-content ul, .doc-content ol {
+  @apply ml-6 mb-3;
+}
+
+.doc-content li {
+  @apply text-base text-slate-700 mb-2;
+}
+
+.doc-content code {
+  @apply bg-slate-100 text-red-600 px-2 py-1 rounded font-mono text-sm;
+}
+
+.doc-content pre {
+  @apply bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4;
+}
+
+.doc-content pre code {
+  @apply bg-transparent text-slate-100 p-0;
+}
+
+.doc-content blockquote {
+  @apply border-l-4 border-blue-500 pl-4 py-2 bg-blue-50 my-4;
+}

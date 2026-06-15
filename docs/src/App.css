@@ -1,0 +1,46 @@
+/* Documentation App Styles */
+
+.sidebar-nav {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.3) transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.3);
+  border-radius: 3px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.5);
+}
+
+/* Smooth transitions */
+.nav-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.nav-button:hover {
+  transform: translateX(4px);
+}
+
+/* Code block styling */
+code {
+  font-family: 'Fira Code', 'Courier New', monospace;
+}
+
+/* Link styling */
+a {
+  position: relative;
+}
+
+a:hover {
+  text-decoration: underline;
+}
