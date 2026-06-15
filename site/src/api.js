@@ -32,9 +32,20 @@ const fetchWithAuth = async (path, options = {}) => {
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
 
-  const data = await response.json().catch(() => null);
+  const text = await response.text().catch(() => null);
+  let data;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = null;
+  }
+
   if (!response.ok) {
-    throw new Error(data?.error || data?.message || 'Server request failed');
+    const message = data?.error || data?.message || text || `HTTP ${response.status}`;
+    const err = new Error(message);
+    err.status = response.status;
+    err.body = text;
+    throw err;
   }
 
   return data;
@@ -46,7 +57,7 @@ export const api = {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       return { user: userCredential.user, token: await userCredential.user.getIdToken() };
     } catch (error) {
-      throw new Error(error.message || 'Login failed');
+      throw new Error("Login failed", { cause: error });
     }
   },
 
@@ -55,7 +66,7 @@ export const api = {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       return { user: userCredential.user, token: await userCredential.user.getIdToken() };
     } catch (error) {
-      throw new Error(error.message || 'Signup failed');
+      throw new Error("Signup failed", { cause: error });
     }
   },
 
@@ -63,7 +74,7 @@ export const api = {
     try {
       await signOut(auth);
     } catch (error) {
-      throw new Error(error.message || 'Logout failed');
+      throw new Error("Logout failed", { cause: error });
     }
   },
 
@@ -72,6 +83,24 @@ export const api = {
   },
 
   getCurrentUser: () => currentUser,
+
+  getSettings: async () => {
+    return fetchWithAuth('/settings');
+  },
+
+  saveSettings: async (settings) => {
+    return fetchWithAuth('/settings', {
+      method: 'POST',
+      body: settings,
+    });
+  },
+
+  onAuthStateChanged: (callback) => {
+    return onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      callback(user);
+    });
+  },
 
   getWeeklyWaste: async () => {
     return fetchWithAuth('/stats/weekly-waste');
@@ -114,7 +143,8 @@ export const api = {
   },
 
   getDailyLogs: async () => {
-    return fetchWithAuth('/data/daily-logs');
+    const data = await fetchWithAuth('/data/daily-logs');
+    return Array.isArray(data) ? data : [];
   },
 
   addDailyLog: async (logData) => {
