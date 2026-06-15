@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { HelpCircle, ChevronDown } from 'lucide-react';
+import Alert from '../components/Alert';
 
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState(null);
@@ -87,14 +88,13 @@ export default function FAQ() {
         ))}
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-8">
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">Didn't find your answer?</h3>
-        <p className="text-slate-700 mb-4">
+      <div className="mt-8">
+        <Alert type="info" title="Didn't find your answer?">
           We're here to help! Contact our support team or check out our other documentation sections.
-        </p>
+        </Alert>
         <a
           href="mailto:support@foodwasteai.com"
-          className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition"
+          className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition mt-4"
         >
           Contact Support
         </a>

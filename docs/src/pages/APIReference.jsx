@@ -1,5 +1,7 @@
 import React from 'react';
 import { Code } from 'lucide-react';
+import CodeBlock from '../components/CodeBlock';
+import Alert from '../components/Alert';
 
 export default function APIReference() {
   return (
@@ -22,28 +24,28 @@ export default function APIReference() {
             <h3 className="text-lg font-semibold text-slate-900 mb-2">POST /auth/login</h3>
             <p className="text-slate-700 mb-2">Authenticate user with email and password.</p>
             <p className="text-sm text-slate-600 mb-2"><strong>Request:</strong></p>
-            <pre className="bg-slate-900 text-slate-100 p-3 rounded text-sm"><code>{`{
+            <CodeBlock code={`{
   "email": "user@example.com",
   "password": "password123"
-}`}</code></pre>
-            <p className="text-sm text-slate-600 mb-2"><strong>Response:</strong></p>
-            <pre className="bg-slate-900 text-slate-100 p-3 rounded text-sm"><code>{`{
+}`} language="json" />
+            <p className="text-sm text-slate-600 mb-2 mt-3"><strong>Response:</strong></p>
+            <CodeBlock code={`{
   "token": "jwt_token",
   "user": {
     "uid": "user_id",
     "email": "user@example.com"
   }
-}`}</code></pre>
+}`} language="json" />
           </div>
 
           <div className="bg-slate-50 p-4 rounded-lg mb-4">
             <h3 className="text-lg font-semibold text-slate-900 mb-2">POST /auth/signup</h3>
             <p className="text-slate-700 mb-2">Register a new user account.</p>
             <p className="text-sm text-slate-600 mb-2"><strong>Request:</strong></p>
-            <pre className="bg-slate-900 text-slate-100 p-3 rounded text-sm"><code>{`{
+            <CodeBlock code={`{
   "email": "newuser@example.com",
   "password": "password123"
-}`}</code></pre>
+}`} language="json" />
           </div>
         </section>
 
@@ -54,9 +56,9 @@ export default function APIReference() {
             <h3 className="text-lg font-semibold text-slate-900 mb-2">GET /api/predictions</h3>
             <p className="text-slate-700 mb-2">Get all predictions for the current user.</p>
             <p className="text-sm text-slate-600 mb-2"><strong>Headers:</strong></p>
-            <pre className="bg-slate-900 text-slate-100 p-3 rounded text-sm"><code>Authorization: Bearer {`<token>`}</code></pre>
-            <p className="text-sm text-slate-600 mb-2"><strong>Response:</strong></p>
-            <pre className="bg-slate-900 text-slate-100 p-3 rounded text-sm"><code>{`[
+            <CodeBlock code={`Authorization: Bearer <token>`} language="bash" />
+            <p className="text-sm text-slate-600 mb-2 mt-3"><strong>Response:</strong></p>
+            <CodeBlock code={`[
   {
     "id": "pred_123",
     "foodItem": "Apple",
@@ -66,18 +68,18 @@ export default function APIReference() {
     "confidence": 0.92,
     "timestamp": "2024-01-15T10:30:00Z"
   }
-]`}</code></pre>
+]`} language="json" />
           </div>
 
           <div className="bg-slate-50 p-4 rounded-lg mb-4">
             <h3 className="text-lg font-semibold text-slate-900 mb-2">POST /api/predictions</h3>
             <p className="text-slate-700 mb-2">Create a new prediction.</p>
             <p className="text-sm text-slate-600 mb-2"><strong>Request:</strong></p>
-            <pre className="bg-slate-900 text-slate-100 p-3 rounded text-sm"><code>{`{
+            <CodeBlock code={`{
   "foodItem": "Apple",
   "quantity": 50,
   "unit": "kg"
-}`}</code></pre>
+}`} language="json" />
           </div>
         </section>
 
@@ -88,16 +90,16 @@ export default function APIReference() {
             <h3 className="text-lg font-semibold text-slate-900 mb-2">GET /api/recommendations</h3>
             <p className="text-slate-700 mb-2">Get AI-generated recommendations for waste reduction.</p>
             <p className="text-sm text-slate-600 mb-2"><strong>Headers:</strong></p>
-            <pre className="bg-slate-900 text-slate-100 p-3 rounded text-sm"><code>Authorization: Bearer {`<token>`}</code></pre>
-            <p className="text-sm text-slate-600 mb-2"><strong>Response:</strong></p>
-            <pre className="bg-slate-900 text-slate-100 p-3 rounded text-sm"><code>{`[
+            <CodeBlock code={`Authorization: Bearer <token>`} language="bash" />
+            <p className="text-sm text-slate-600 mb-2 mt-3"><strong>Response:</strong></p>
+            <CodeBlock code={`[
   {
     "id": "rec_123",
     "title": "Optimize ordering",
     "description": "Reduce orders by 10%",
     "impact": "Could save 2.5kg per week"
   }
-]`}</code></pre>
+]`} language="json" />
           </div>
         </section>
 

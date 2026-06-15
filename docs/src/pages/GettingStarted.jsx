@@ -1,5 +1,7 @@
 import React from 'react';
 import { Zap } from 'lucide-react';
+import CodeBlock from '../components/CodeBlock';
+import Alert from '../components/Alert';
 
 export default function GettingStarted() {
   return (
@@ -31,25 +33,23 @@ export default function GettingStarted() {
           <div className="bg-slate-50 p-4 rounded-lg space-y-4">
             <div>
               <h3 className="font-semibold text-slate-900 mb-2">Step 1: Clone the Repository</h3>
-              <pre className="bg-slate-900 text-slate-100 p-4 rounded overflow-x-auto"><code>git clone &lt;repository-url&gt;
-cd Food_waste_AI</code></pre>
+              <CodeBlock code={`git clone <repository-url>\ncd Food_waste_AI`} language="bash" />
             </div>
             <div>
               <h3 className="font-semibold text-slate-900 mb-2">Step 2: Install Dependencies</h3>
-              <pre className="bg-slate-900 text-slate-100 p-4 rounded overflow-x-auto"><code>cd site
-npm install</code></pre>
+              <CodeBlock code={`cd site\nnpm install`} language="bash" />
             </div>
             <div>
               <h3 className="font-semibold text-slate-900 mb-2">Step 3: Configure Firebase</h3>
               <p className="text-slate-700 mb-2">Create a <code className="bg-slate-100 text-red-600 px-2 py-1 rounded">.env.local</code> file with your Firebase credentials:</p>
-              <pre className="bg-slate-900 text-slate-100 p-4 rounded overflow-x-auto"><code>VITE_FIREBASE_API_KEY=your_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
-VITE_FIREBASE_PROJECT_ID=your_project_id
-...</code></pre>
+              <CodeBlock 
+                code={`VITE_FIREBASE_API_KEY=your_api_key\nVITE_FIREBASE_AUTH_DOMAIN=your_auth_domain\nVITE_FIREBASE_PROJECT_ID=your_project_id\n...`}
+                language="env"
+              />
             </div>
             <div>
               <h3 className="font-semibold text-slate-900 mb-2">Step 4: Start Development Server</h3>
-              <pre className="bg-slate-900 text-slate-100 p-4 rounded overflow-x-auto"><code>npm run dev</code></pre>
+              <CodeBlock code={`npm run dev`} language="bash" />
             </div>
           </div>
         </section>
@@ -63,19 +63,20 @@ VITE_FIREBASE_PROJECT_ID=your_project_id
             <li>Access the dashboard to view waste predictions</li>
             <li>Explore different sections to understand the system</li>
           </ol>
+          <Alert type="success" title="Ready to go!">
+            You're now running a fully functional instance of Food Waste AI locally.
+          </Alert>
         </section>
 
         <section>
           <h2 className="text-2xl font-bold text-slate-900">Common Issues</h2>
           <div className="space-y-4">
-            <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4">
-              <h3 className="font-semibold text-slate-900 mb-1">Firebase Authentication Error</h3>
-              <p className="text-slate-700 text-sm">Make sure your Firebase credentials are correctly set in the <code className="bg-slate-100 text-red-600 px-1">.env.local</code> file.</p>
-            </div>
-            <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4">
-              <h3 className="font-semibold text-slate-900 mb-1">Port Already in Use</h3>
-              <p className="text-slate-700 text-sm">If port 5173 is already in use, Vite will automatically try the next available port.</p>
-            </div>
+            <Alert type="warning" title="Firebase Authentication Error">
+              Make sure your Firebase credentials are correctly set in the <code className="bg-slate-100 text-red-600 px-1">.env.local</code> file.
+            </Alert>
+            <Alert type="info" title="Port Already in Use">
+              If port 5173 is already in use, Vite will automatically try the next available port.
+            </Alert>
           </div>
         </section>
       </div>

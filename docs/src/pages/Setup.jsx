@@ -1,5 +1,7 @@
 import React from 'react';
 import { Cog } from 'lucide-react';
+import CodeBlock from '../components/CodeBlock';
+import Alert from '../components/Alert';
 
 export default function Setup() {
   return (
@@ -20,19 +22,25 @@ export default function Setup() {
           <p className="text-slate-700">The backend requires Node.js and Firebase Admin credentials.</p>
           
           <h3 className="text-xl font-semibold text-slate-900 mt-4 mb-2">Installation</h3>
-          <pre className="bg-slate-900 text-slate-100 p-4 rounded overflow-x-auto"><code>cd backend
-npm install</code></pre>
+          <CodeBlock code={`cd backend\nnpm install`} language="bash" />
 
           <h3 className="text-xl font-semibold text-slate-900 mt-4 mb-2">Environment Variables</h3>
           <p className="text-slate-700 mb-2">Create a <code className="bg-slate-100 text-red-600 px-2 py-1 rounded">.env</code> file with:</p>
-          <pre className="bg-slate-900 text-slate-100 p-4 rounded overflow-x-auto"><code>PORT=5000
+          <CodeBlock 
+            code={`PORT=5000
 FIREBASE_PROJECT_ID=your_project_id
 FIREBASE_PRIVATE_KEY=your_private_key
 FIREBASE_CLIENT_EMAIL=your_client_email
-FIREBASE_API_KEY=your_api_key</code></pre>
+FIREBASE_API_KEY=your_api_key`}
+            language="env"
+          />
 
           <h3 className="text-xl font-semibold text-slate-900 mt-4 mb-2">Running the Server</h3>
-          <pre className="bg-slate-900 text-slate-100 p-4 rounded overflow-x-auto"><code>npm run server</code></pre>
+          <CodeBlock code={`npm run server`} language="bash" />
+
+          <Alert type="info" title="Backend Ready">
+            Your backend server will be running on http://localhost:5000 and ready to handle API requests.
+          </Alert>
         </section>
 
         <section>
@@ -40,23 +48,25 @@ FIREBASE_API_KEY=your_api_key</code></pre>
           <p className="text-slate-700">The frontend is a React application built with Vite.</p>
           
           <h3 className="text-xl font-semibold text-slate-900 mt-4 mb-2">Installation</h3>
-          <pre className="bg-slate-900 text-slate-100 p-4 rounded overflow-x-auto"><code>cd site
-npm install</code></pre>
+          <CodeBlock code={`cd site\nnpm install`} language="bash" />
 
           <h3 className="text-xl font-semibold text-slate-900 mt-4 mb-2">Environment Variables</h3>
           <p className="text-slate-700 mb-2">Create a <code className="bg-slate-100 text-red-600 px-2 py-1 rounded">.env.local</code> file:</p>
-          <pre className="bg-slate-900 text-slate-100 p-4 rounded overflow-x-auto"><code>VITE_FIREBASE_API_KEY=your_api_key
+          <CodeBlock 
+            code={`VITE_FIREBASE_API_KEY=your_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
 VITE_FIREBASE_PROJECT_ID=your_project_id
 VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
 VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-VITE_FIREBASE_APP_ID=your_app_id</code></pre>
+VITE_FIREBASE_APP_ID=your_app_id`}
+            language="env"
+          />
 
           <h3 className="text-xl font-semibold text-slate-900 mt-4 mb-2">Development Server</h3>
-          <pre className="bg-slate-900 text-slate-100 p-4 rounded overflow-x-auto"><code>npm run dev</code></pre>
+          <CodeBlock code={`npm run dev`} language="bash" />
 
           <h3 className="text-xl font-semibold text-slate-900 mt-4 mb-2">Production Build</h3>
-          <pre className="bg-slate-900 text-slate-100 p-4 rounded overflow-x-auto"><code>npm run build</code></pre>
+          <CodeBlock code={`npm run build`} language="bash" />
         </section>
 
         <section>
