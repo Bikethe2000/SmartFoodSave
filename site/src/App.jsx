@@ -12,6 +12,9 @@ import Settings from "./pages/Settings";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import SchoolBanner from "./components/SchoolBanner";
+import WeeklySchedulePro from "./pages/WeeklySchedule";
+import AboutUs from "./pages/AboutUs";
+import Documentation from "./pages/Documentation";
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(api.isAuthenticated());
@@ -67,8 +70,10 @@ export default function App() {
       )}
 
       <Routes>
-        {/* Landing page */}
+        {/* Public pages */}
         <Route path="/" element={<Landing />} />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="http://localhost:5174/" element={<Documentation />} />
 
         {/* Protected routes */}
         <Route
@@ -78,6 +83,10 @@ export default function App() {
         <Route
           path="/predictions"
           element={renderProtected(<Predictions />)}
+        />
+        <Route
+          path="/weekly-schedule"
+          element={renderProtected(<WeeklySchedulePro />)}
         />
         <Route
           path="/actions"

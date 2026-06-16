@@ -1,286 +1,321 @@
-import React, { useState, useEffect } from 'react';
-import { api } from '../api';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  AlertTriangle, 
-  Trash2, 
-  Calendar, 
-  Sparkles,
-  ArrowRight,
-  ShieldCheck,
-  CheckCircle,
-  XCircle
-} from 'lucide-react';
-import { 
-  ResponsiveContainer, 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  CartesianGrid 
-} from 'recharts';
+import { useEffect, useState } from "react";
+import { auth } from "../firebase";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  BarChart,
+  Bar,
+} from "recharts";
+import {
+  TrendingUp,
+  TrendingDown,
+  PieChart,
+  CalendarDays,
+  Lightbulb,
+} from "lucide-react";
 
-export default function Dashboard({ setActiveTab }) {
-  const [weeklyWaste, setWeeklyWaste] = useState([]);
-  const [alerts, setAlerts] = useState([]);
-  const [quickRecs, setQuickRecs] = useState([]);
+export default function Dashboard() {
+  const [logs, setLogs] = useState([]);
+  const [mealStats, setMealStats] = useState({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [weeklyPrediction, setWeeklyPrediction] = useState(null);
+  const [predicting, setPredicting] = useState(false);
+  const [defaultSchedule, setDefaultSchedule] = useState({});
 
+
+  const getToken = async () => {
+    const user = auth.currentUser;
+    if (!user) return null;
+    return await user.getIdToken();
+  };
+
+  // LOAD LOGS
   useEffect(() => {
-    async function fetchData() {
+    async function loadLogs() {
       try {
-        setLoading(true);
-        const [wasteData, alertData, recData] = await Promise.all([
-          api.getWeeklyWaste(),
-          api.getUpcomingPredictions(),
-          api.getTodayRecommendations()
-        ]);
-        setWeeklyWaste(wasteData);
-        setAlerts(alertData);
-        setQuickRecs(recData);
-        setError(null);
+        const token = await getToken();
+        if (!token) return;
+
+        const res = await fetch("/api/data/daily-logs", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const data = await res.json();
+        setLogs(data);
+
+        const stats = {};
+        data.forEach((log) => {
+          log.menuItems.forEach((item) => {
+            if (!stats[item]) stats[item] = { count: 0, waste: 0 };
+            stats[item].count += 1;
+            stats[item].waste += log.leftovers;
+          });
+        });
+
+        setMealStats(stats);
       } catch (err) {
-        console.error(err);
-        setError('Failed to load dashboard data. Ensure the backend server is running.');
-      } finally {
-        setLoading(false);
+        console.error("Failed to load logs:", err);
       }
+
+      setLoading(false);
     }
-    fetchData();
+
+    loadLogs();
   }, []);
 
-  const totalWasteThisWeek = weeklyWaste.reduce((sum, item) => sum + item.waste, 0).toFixed(1);
-  // Simple calculated metrics based on loaded data
-  const highRiskCount = alerts.filter(a => a.riskLevel === 'High').length;
-  const mostWastedItem = "Pasta Carbonara"; // Static derived or mock
+  // LOAD SCHEDULE + AUTO‑CREATE DEFAULT IF MISSING
+  useEffect(() => {
+    async function loadSchedule() {
+      const token = await getToken();
+      if (!token) return;
 
+      const res = await fetch("/api/schedule", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      let schedule = data.schedule;
+
+      if (!schedule || Object.keys(schedule).length === 0) {
+        
+
+        await fetch("/api/schedule", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ schedule }),
+        });
+      }
+
+      const normalized = {};
+      Object.keys(schedule).forEach((day) => {
+        normalized[day.charAt(0).toUpperCase() + day.slice(1)] = schedule[day];
+      });
+
+      setDefaultSchedule(normalized);
+    }
+
+    loadSchedule();
+  }, []);
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+      <div className="max-w-3xl mx-auto text-center py-10 text-slate-500">
+        Loading dashboard...
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center max-w-2xl mx-auto my-12">
-        <AlertTriangle className="h-12 w-12 text-red-600 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-red-800">Connection Error</h3>
-        <p className="text-red-600 mt-2">{error}</p>
-        <button 
-          onClick={() => window.location.reload()}
-          className="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition"
-        >
-          Retry Connection
-        </button>
-      </div>
-    );
+  const totalPrepared = logs.reduce((a, b) => a + (b.prepared || 0), 0);
+  const totalLeftovers = logs.reduce((a, b) => a + (b.leftovers || 0), 0);
+  const totalAttendance = logs.reduce((a, b) => a + (b.attendance || 0), 0);
+
+  const wastePercent =
+    totalPrepared > 0 ? ((totalLeftovers / totalPrepared) * 100).toFixed(1) : 0;
+
+  const insight =
+    wastePercent > 25
+      ? "Waste levels are high. Consider adjusting portions or reviewing menu items."
+      : wastePercent > 10
+      ? "Moderate waste. Some improvements could help reduce leftovers."
+      : "Great job! Waste levels are low and stable.";
+
+  const mealPerformance = Object.entries(mealStats).map(([meal, stats]) => ({
+    meal,
+    avgWaste: stats.waste / stats.count,
+  }));
+
+  const predictNextWeek = async () => {
+    const token = await getToken();
+    if (!token) return;
+
+    setPredicting(true);
+    const results = {};
+    const suggestedSoFar = [];
+
+    const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+    const dates = getNextWeekdays();
+
+    for (let i = 0; i < 5; i++) {
+      const day = weekdays[i];
+      const date = dates[i];
+
+      const res = await fetch("/api/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          date: date,
+          menu_item: defaultSchedule[day] || null,
+          prepared_portions: 120,
+          attendance: 100,
+          preferred_foods: null,
+          excluded_meals: suggestedSoFar
+        }),
+      });
+
+      const data = await res.json();
+      results[day] = data;
+
+      if (data.menuItemUsed) {
+        suggestedSoFar.push(data.menuItemUsed);
+      }
+    }
+
+    setWeeklyPrediction(results);
+    setPredicting(false);
+  };
+
+  function getNextWeekdays() {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const daysUntilNextMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
+    const dates = [];
+    for (let i = 0; i < 5; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + daysUntilNextMonday + i);
+      dates.push(d.toISOString().split("T")[0]);
+    }
+    return dates;
   }
 
+  const getTrendColor = () => {
+    if (wastePercent < 10) return "text-emerald-600";
+    if (wastePercent < 20) return "text-yellow-600";
+    return "text-red-600";
+  };
   return (
-    <div className="space-y-8 animate-fade-in">
-      {/* Hero Welcome */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-emerald-700 to-teal-800 rounded-3xl p-8 md:p-12 text-white shadow-xl">
-        <div className="absolute right-0 top-0 w-1/3 h-full opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-400 to-transparent pointer-events-none"></div>
-        <div className="relative z-10 max-w-2xl space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-600/50 backdrop-blur-md rounded-full border border-emerald-500/30 text-emerald-200 text-sm font-semibold">
-            <Sparkles className="h-4 w-4 text-emerald-300" />
-            AI-Powered Waste Prevention
-          </div>
-          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">SmartFoodSave</h1>
-          <p className="text-emerald-100 text-lg">
-            Welcome to SmartFoodSave. Make your school’s food waste visible, predictable, and manageable.
-          </p>
-        </div>
+    <div className="max-w-5xl mx-auto space-y-8 animate-fade-in mb-10">
+      <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <SummaryCard
+          title="Attendance"
+          value={totalAttendance}
+          icon={<CalendarDays className="h-5 w-5 text-emerald-600" />}
+        />
+        <SummaryCard
+          title="Prepared"
+          value={totalPrepared}
+          icon={<PieChart className="h-5 w-5 text-indigo-600" />}
+        />
+        <SummaryCard
+          title="Leftovers"
+          value={totalLeftovers}
+          icon={<TrendingDown className="h-5 w-5 text-red-600" />}
+        />
+        <SummaryCard
+          title="Waste %"
+          value={`${wastePercent}%`}
+          icon={<TrendingUp className="h-5 w-5 text-yellow-600" />}
+          color={getTrendColor()}
+        />
       </div>
 
-      {/* KPI Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* KPI 1 */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition">
-          <div className="flex justify-between items-start">
-            <p className="text-sm font-medium text-slate-500">Estimated Waste This Week</p>
-            <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
-              <Trash2 className="h-5 w-5" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <h3 className="text-3xl font-bold text-slate-800">{totalWasteThisWeek} kg</h3>
-            <span className="inline-flex items-center gap-1 mt-1 text-sm font-semibold text-emerald-600">
-              <TrendingDown className="h-4 w-4" />
-              -12.4% vs last week
-            </span>
-          </div>
-        </div>
+      <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+        <h2 className="text-lg font-bold text-slate-700 mb-4">
+          Waste Trend (Last 14 Days)
+        </h2>
 
-        {/* KPI 2 */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition">
-          <div className="flex justify-between items-start">
-            <p className="text-sm font-medium text-slate-500">Change vs Last Week</p>
-            <div className="p-3 bg-teal-50 rounded-xl text-teal-600">
-              <TrendingDown className="h-5 w-5" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <h3 className="text-3xl font-bold text-slate-800">-12.4%</h3>
-            <span className="inline-flex items-center gap-1 mt-1 text-sm font-semibold text-slate-500">
-              Down from 44.8 kg
-            </span>
-          </div>
-        </div>
-
-        {/* KPI 3 */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition">
-          <div className="flex justify-between items-start">
-            <p className="text-sm font-medium text-slate-500">High-Risk Days</p>
-            <div className="p-3 bg-amber-50 rounded-xl text-amber-600">
-              <AlertTriangle className="h-5 w-5" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <h3 className="text-3xl font-bold text-slate-800">{highRiskCount}</h3>
-            <span className="inline-flex items-center gap-1 mt-1 text-sm font-semibold text-amber-600">
-              Requires menu adjustment
-            </span>
-          </div>
-        </div>
-
-        {/* KPI 4 */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition">
-          <div className="flex justify-between items-start">
-            <p className="text-sm font-medium text-slate-500">Most Wasted Item</p>
-            <div className="p-3 bg-red-50 rounded-xl text-red-600">
-              <AlertTriangle className="h-5 w-5" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <h3 className="text-xl font-bold text-slate-800 truncate">{mostWastedItem}</h3>
-            <span className="inline-flex items-center gap-1 mt-1 text-sm font-semibold text-red-600">
-              Avg 12.5 kg leftover
-            </span>
-          </div>
-        </div>
+        <ResponsiveContainer width="100%" height={260}>
+          <LineChart data={logs}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+            <XAxis dataKey="date" stroke="#94a3b8" />
+            <YAxis stroke="#94a3b8" />
+            <Tooltip />
+            <Line
+              type="monotone"
+              dataKey="leftovers"
+              stroke="#10b981"
+              strokeWidth={3}
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
 
-      {/* Main Charts & Predictions grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Chart Column */}
-        <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-lg font-bold text-slate-800">Weekly Waste Trend</h2>
-              <p className="text-sm text-slate-500">Real-time daily food leftovers (kg)</p>
-            </div>
-          </div>
-          <div className="h-80 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={weeklyWaste} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorWaste" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#059669" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#059669" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="day" tickLine={false} axisLine={false} stroke="#94a3b8" />
-                <YAxis tickLine={false} axisLine={false} stroke="#94a3b8" />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  labelStyle={{ fontWeight: 'bold', color: '#1e293b' }}
-                />
-                <Area type="monotone" dataKey="waste" stroke="#059669" strokeWidth={3} fillOpacity={1} fill="url(#colorWaste)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+      <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+        <h2 className="text-lg font-bold text-slate-700 mb-4">
+          Meal Performance (Avg Waste)
+        </h2>
 
-        {/* Alerts Column */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-4 flex flex-col justify-between">
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-lg font-bold text-slate-800">Upcoming Risk Alerts</h2>
-              <p className="text-sm text-slate-500">High risk days flagged by AI</p>
-            </div>
-            
-            <div className="space-y-4 overflow-y-auto max-h-[280px] pr-1">
-              {alerts.length === 0 ? (
-                <div className="text-center py-8 text-slate-400">
-                  <ShieldCheck className="h-10 w-10 mx-auto text-emerald-500 mb-2" />
-                  <p className="text-sm">No high-risk days flagged</p>
+        <ResponsiveContainer width="100%" height={260}>
+          <BarChart data={mealPerformance}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+            <XAxis dataKey="meal" stroke="#94a3b8" />
+            <YAxis stroke="#94a3b8" />
+            <Tooltip />
+            <Bar dataKey="avgWaste" fill="#6366f1" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl text-emerald-800 text-sm font-semibold">
+        {insight}
+      </div>
+
+      <button
+        onClick={predictNextWeek}
+        disabled={predicting}
+        className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-1.5 transition"
+      >
+        <Lightbulb className="h-4 w-4" />
+        {predicting ? "Predicting..." : "Predict Next Week"}
+      </button>
+
+      {weeklyPrediction && (
+        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+          <h2 className="text-lg font-bold text-slate-700">Weekly Schedule Comparison</h2>
+
+          {Object.entries(weeklyPrediction).map(([day, result]) => (
+            <div key={day} className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+              <div className="font-bold text-slate-800 mb-2">{day}</div>
+
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <div className="text-slate-500">Default Meal</div>
+                  <div className="font-semibold">{defaultSchedule[day] || "—"}</div>
                 </div>
-              ) : (
-                alerts.map(alert => (
-                  <div key={alert.id} className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
-                        <Calendar className="h-3.5 w-3.5" />
-                        {alert.date}
-                      </span>
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                        alert.riskLevel === 'High' ? 'bg-red-50 text-red-700 border border-red-100' : 'bg-amber-50 text-amber-700 border border-amber-100'
-                      }`}>
-                        {alert.riskLevel} Risk
-                      </span>
-                    </div>
-                    <h4 className="font-bold text-slate-700 text-sm">{alert.menuItems.join(', ')}</h4>
-                    <p className="text-xs text-slate-500 line-clamp-2">{alert.explanation}</p>
+
+                <div>
+                  <div className="text-slate-500">Suggested Meal</div>
+                  <div className="font-semibold text-indigo-600">
+                    {result.menuItemUsed}
                   </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          <button 
-            onClick={() => setActiveTab('predictions')}
-            className="w-full mt-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold flex items-center justify-center gap-1 transition"
-          >
-            View Predictions Table
-            <ArrowRight className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Quick Recommendations Footer */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-lg font-bold text-slate-800">Quick Recommendations</h2>
-            <p className="text-sm text-slate-500">Top efficiency actions for today</p>
-          </div>
-          <button 
-            onClick={() => setActiveTab('actions')}
-            className="text-emerald-600 hover:text-emerald-700 text-sm font-bold flex items-center gap-1 transition"
-          >
-            All Actions
-            <ArrowRight className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {quickRecs.length === 0 ? (
-            <div className="md:col-span-3 text-center py-8 text-slate-400">
-              <CheckCircle className="h-10 w-10 mx-auto text-emerald-500 mb-2" />
-              <p className="text-sm">All recommendations reviewed!</p>
-            </div>
-          ) : (
-            quickRecs.map(rec => (
-              <div key={rec.id} className="p-5 bg-emerald-50/40 rounded-2xl border border-emerald-100/50 flex flex-col justify-between space-y-4">
-                <div className="space-y-2">
-                  <h4 className="font-bold text-slate-800 text-sm">{rec.title}</h4>
-                  <p className="text-xs text-slate-500">{rec.description}</p>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-semibold text-emerald-700">Save {rec.impactKg} kg</span>
-                  <span className="text-slate-400">{(rec.confidence * 100).toFixed(0)}% confidence</span>
                 </div>
               </div>
-            ))
-          )}
+
+              <div className="mt-2 text-xs text-slate-600">
+                Waste: <strong>{result.predictedWastePortions}</strong> portions  
+                <br />
+                Risk: <strong>{result.riskLevel}</strong>
+                <br />
+                <span className="text-slate-500">{result.explanation}</span>
+              </div>
+            </div>
+          ))}
         </div>
+      )}
+    </div>
+  );
+}
+
+function SummaryCard({ title, value, icon, color }) {
+  return (
+    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-1">
+      <div className="flex items-center gap-2 text-slate-600 text-xs font-bold uppercase">
+        {icon}
+        {title}
+      </div>
+      <div className={`text-xl font-bold ${color || "text-slate-800"}`}>
+        {value}
       </div>
     </div>
   );

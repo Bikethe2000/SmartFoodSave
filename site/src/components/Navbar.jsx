@@ -27,21 +27,24 @@ export default function Navbar({ isAuthenticated: initialAuth }) {
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
         <Link to="/" className="font-extrabold text-xl text-emerald-600">SmartFoodSave</Link>
 
-        <nav className="flex items-center gap-4">
-          {/* <Link to="/" className="text-slate-700 hover:text-slate-900">Home</Link> */}
+        <nav className="flex items-center gap-6">
           {isAuthenticated && (
             <>
-              <Link to="/dashboard" className="ml-200 text-slate-700 hover:text-slate-900">Dashboard</Link>
-              <Link to="/predictions" className="text-slate-700 hover:text-slate-900">Predictions</Link>
-              <Link to="/data" className="text-slate-700 hover:text-slate-900">Data</Link>
-              <Link to="/settings" className="text-slate-700 hover:text-slate-900">Settings</Link>
-              <button onClick={handleLogout} className="ml-4 px-3 py-1 bg-emerald-600 text-white rounded-md">Logout</button>
+              <Link to="/dashboard" className="text-slate-700 hover:text-slate-900 font-medium">Dashboard</Link>
+              <Link to="/weekly-schedule" className="text-slate-700 hover:text-slate-900 font-medium">Schedule</Link>
+              <Link to="/predictions" className="text-slate-700 hover:text-slate-900 font-medium">Predictions</Link>
+              <Link to="/data" className="text-slate-700 hover:text-slate-900 font-medium">Data</Link>
+              <Link to="/settings" className="text-slate-700 hover:text-slate-900 font-medium">Settings</Link>
+              <button onClick={handleLogout} className="ml-4 px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition font-medium">Logout</button>
             </>
           )}
 
           {!isAuthenticated && (
             <>
-              <Link to="/login" className="px-3 py-1 bg-emerald-600 text-white rounded-md">Sign in</Link>
+              <Link to="/" className="text-slate-700 hover:text-slate-900 font-medium">Home</Link>
+              <Link to="/about" className="text-slate-700 hover:text-slate-900 font-medium">About Us</Link>
+              <Link to="http://localhost:5174/" className="text-slate-700 hover:text-slate-900 font-medium">Documentation</Link>
+              <Link to="/login" className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition font-medium">Sign in</Link>
             </>
           )}
         </nav>

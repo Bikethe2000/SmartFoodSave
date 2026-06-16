@@ -4,6 +4,8 @@ from datetime import datetime
 from pathlib import Path
 from functools import wraps
 
+from engine.predict import router as predict_router
+from schedule import router as schedule_router
 from fastapi import FastAPI, Request, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -26,14 +28,23 @@ load_dotenv()
 app = FastAPI()
 PORT = int(os.getenv("PORT", 5000))
 
-# CORS
+
+# ---------------------------
+# CORS (ΠΟΛΥ ΣΗΜΑΝΤΙΚΟ)
+# ---------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_origin_regex=r"^http://localhost:\d+$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
 
 db = None
 FIREBASE_API_KEY = os.getenv("FIREBASE_API_KEY")
@@ -397,7 +408,213 @@ async def save_daily_logs(request: Request, user=Depends(authenticate)):
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Failed to save log: {str(e)}")
 
+@app.post("/api/schedule")
+async def save_schedule(request: Request, user=Depends(authenticate)):
+    data = await request.json()
+    schedule = data.get("schedule")
 
+    if not schedule:
+        raise HTTPException(400, "Missing schedule")
+
+    user_uid = user["uid"]
+    user_doc = db.collection("users").document(user_uid).get()
+
+    if not user_doc.exists:
+        raise HTTPException(404, "User not found")
+
+    school = user_doc.to_dict().get("school")
+    if not school:
+        raise HTTPException(400, "School not set")
+
+    db.collection("school_schedules").document(school).set({
+        "schedule": schedule,
+        "updatedAt": datetime.utcnow()
+    })
+
+    return {"status": "ok"}
+
+
+@app.get("/api/schedule")
+async def get_schedule(user=Depends(authenticate)):
+    user_uid = user["uid"]
+    user_doc = db.collection("users").document(user_uid).get()
+
+    if not user_doc.exists:
+        raise HTTPException(404, "User not found")
+
+    school = user_doc.to_dict().get("school")
+    if not school:
+        raise HTTPException(400, "School not set")
+
+    doc = db.collection("school_schedules").document(school).get()
+
+    if not doc.exists:
+        return {"schedule": {}}
+
+    return {"schedule": doc.to_dict().get("schedule", {})}
+
+@app.get("/api/meals/dictionary")
+async def get_meal_dictionary(user=Depends(authenticate)):
+    school = get_user_school(user["uid"])
+    doc = db.collection("school_meals").document(school).get()
+    if not doc.exists:
+        return {}
+    return doc.to_dict().get("dictionary", {})
+
+@app.post("/api/meals/dictionary")
+async def save_meal_dictionary(request: Request, user=Depends(authenticate)):
+    school = get_user_school(user["uid"])
+    data = await request.json()
+    dictionary = data.get("dictionary", {})
+
+    db.collection("school_meals").document(school).set({
+        "dictionary": dictionary
+    }, merge=True)
+
+    return {"status": "ok"}
+
+@app.get("/api/meals/tags")
+async def get_meal_tags(user=Depends(authenticate)):
+    school = get_user_school(user["uid"])
+    doc = db.collection("school_meals").document(school).get()
+    if not doc.exists:
+        return {}
+    return doc.to_dict().get("tags", {})
+
+@app.post("/api/meals/tags")
+async def save_meal_tags(request: Request, user=Depends(authenticate)):
+    school = get_user_school(user["uid"])
+    data = await request.json()
+    tags = data.get("tags", {})
+
+    db.collection("school_meals").document(school).set({
+        "tags": tags
+    }, merge=True)
+
+    return {"status": "ok"}
+
+@app.post("/api/meals/normalize")
+async def normalize_meal(request: Request, user=Depends(authenticate)):
+    data = await request.json()
+    raw = (data.get("input") or "").lower().strip()
+
+    if not raw:
+        return {"input": raw, "suggestions": []}
+
+    school = get_user_school(user["uid"])
+    doc = db.collection("school_meals").document(school).get()
+    dictionary = doc.to_dict().get("dictionary", {}) if doc.exists else {}
+
+    suggestions = []
+
+    # 1) Match από dictionary
+    for meal, keywords in dictionary.items():
+        for kw in keywords:
+            if kw.lower() in raw:
+                suggestions.append(meal)
+                break
+
+    # 2) Fallback rules
+    if not suggestions:
+        if "pasta" in raw or "makaron" in raw:
+            suggestions = [
+                "Pasta Bolognese",
+                "Pasta Carbonara",
+                "Pasta Alfredo",
+                "Pasta Napoli"
+            ]
+        elif "chicken" in raw or "kotop" in raw:
+            suggestions = [
+                "Chicken with Rice",
+                "Chicken Soup",
+                "Chicken Fillet"
+            ]
+        elif "fish" in raw or "psari" in raw:
+            suggestions = [
+                "Fish Fillet with Potatoes",
+                "Grilled Fish",
+                "Fish Soup"
+            ]
+
+    return {"input": raw, "suggestions": suggestions}
+
+@app.post("/api/meals/combine")
+async def combine_meal(request: Request, user=Depends(authenticate)):
+    data = await request.json()
+    raw = (data.get("input") or "").lower().strip()
+
+    if not raw:
+        return {"input": raw, "suggestions": []}
+
+    # Split into components
+    parts = [p.strip() for p in raw.replace("+", ",").replace("/", ",").replace("and", ",").split(",")]
+
+    mains = []
+    sides = []
+
+    # Identify main categories
+    main_keywords = {
+        "pasta": ["pasta", "makaron", "spaghetti"],
+        "chicken": ["chicken", "kotop"],
+        "fish": ["fish", "psari"],
+        "beef": ["beef", "mosx"],
+        "pizza": ["pizza"],
+        "lasagna": ["lasagna"]
+    }
+
+    side_keywords = {
+        "salad": ["salad", "salata"],
+        "sauce": ["sauce", "saltsa"],
+        "bread": ["bread"],
+        "rice": ["rice", "rizi"],
+        "potatoes": ["potato", "patates"]
+    }
+
+    # Detect main & sides
+    for part in parts:
+        found_main = False
+        for main, kws in main_keywords.items():
+            if any(kw in part for kw in kws):
+                mains.append(main)
+                found_main = True
+                break
+        if found_main:
+            continue
+
+        for side, kws in side_keywords.items():
+            if any(kw in part for kw in kws):
+                sides.append(side)
+                break
+
+    # Build suggestions
+    suggestions = []
+
+    # MAIN MEAL OPTIONS
+    if "pasta" in mains:
+        base = ["Pasta Bolognese", "Pasta Carbonara", "Pasta Alfredo", "Pasta Napoli"]
+    elif "chicken" in mains:
+        base = ["Chicken with Rice", "Chicken Fillet", "Chicken Soup"]
+    elif "fish" in mains:
+        base = ["Fish Fillet with Potatoes", "Grilled Fish", "Fish Soup"]
+    else:
+        base = ["Unknown Meal"]
+
+    # Add sides
+    final_suggestions = []
+    for meal in base:
+        if sides:
+            combined = meal + " with " + " and ".join(sides)
+        else:
+            combined = meal
+        final_suggestions.append(combined)
+
+    return {
+        "input": raw,
+        "suggestions": final_suggestions
+    }
+
+
+app.include_router(predict_router, prefix="/api/predict", tags=["predict"])
 # ---------------------------
 # HEALTH CHECK
 # ---------------------------
@@ -411,8 +628,6 @@ async def health():
 # ---------------------------
 initialize_firebase()
 
-def run():
-    uvicorn.run(app, host="localhost", port=PORT)
 
 if __name__ == "__main__":
-    run()
+    uvicorn.run(app, host="localhost", port=PORT)
