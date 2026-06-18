@@ -12,6 +12,9 @@ import Settings from "./pages/Settings";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import SchoolBanner from "./components/SchoolBanner";
+import WeeklySchedulePro from "./pages/WeeklySchedule";
+import AboutUs from "./pages/AboutUs";
+import Documentation from "./pages/Documentation";
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(api.isAuthenticated());
