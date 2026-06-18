@@ -16,7 +16,7 @@ export default function Settings({ showConfidenceRanges, setShowConfidenceRanges
     if (!user) return null;
     return await user.getIdToken();
   };
-
+  const API_BASE = 'https://foodwasteai-production.up.railway.app/api';
   // -----------------------------
   // LOAD SETTINGS FROM BACKEND
   // -----------------------------
@@ -29,7 +29,7 @@ export default function Settings({ showConfidenceRanges, setShowConfidenceRanges
           return;
         }
 
-        const res = await fetch("/api/settings", {
+        const res = await fetch(`${API_BASE}/settings`, {
           headers: {
             "Authorization": `Bearer ${token}`
           }
@@ -72,7 +72,7 @@ export default function Settings({ showConfidenceRanges, setShowConfidenceRanges
         return;
       }
 
-      await fetch("/api/settings", {
+      await fetch(`${API_BASE}/settings`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

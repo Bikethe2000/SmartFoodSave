@@ -34,7 +34,7 @@ export default function Dashboard() {
     if (!user) return null;
     return await user.getIdToken();
   };
-
+  const API_BASE = 'https://foodwasteai-production.up.railway.app/api';
   // LOAD LOGS
   useEffect(() => {
     async function loadLogs() {
@@ -42,7 +42,7 @@ export default function Dashboard() {
         const token = await getToken();
         if (!token) return;
 
-        const res = await fetch("/api/data/daily-logs", {
+        const res = await fetch(`${API_BASE}/data/daily-logs`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -75,7 +75,7 @@ export default function Dashboard() {
       const token = await getToken();
       if (!token) return;
 
-      const res = await fetch("/api/schedule", {
+      const res = await fetch(`${API_BASE}/schedule`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -85,7 +85,7 @@ export default function Dashboard() {
       if (!schedule || Object.keys(schedule).length === 0) {
         
 
-        await fetch("/api/schedule", {
+        await fetch(`${API_BASE}/schedule`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -147,7 +147,7 @@ export default function Dashboard() {
       const day = weekdays[i];
       const date = dates[i];
 
-      const res = await fetch("/api/predict", {
+      const res = await fetch(`${API_BASE}/predict`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

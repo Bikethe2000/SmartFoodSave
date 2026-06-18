@@ -9,14 +9,14 @@ export default function MealNormalizerInput({ value, onChange }) {
     if (!user) return null;
     return await user.getIdToken();
   };
-
+  const API_BASE = 'https://foodwasteai-production.up.railway.app/api';
   const handleBlur = async () => {
     if (!value || value.trim().length < 3) return;
 
     const token = await getToken();
     if (!token) return;
 
-    const res = await fetch("/api/meals/normalize", {
+    const res = await fetch(`${API_BASE}/meals/normalize`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

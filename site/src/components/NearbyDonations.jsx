@@ -9,7 +9,7 @@ export default function NearbyDonations() {
   const [city, setCity] = useState("");
   const [userLocation, setUserLocation] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
-
+  const API_BASE = 'https://foodwasteai-production.up.railway.app/api';
   // Detect mobile + geolocation
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -46,7 +46,7 @@ export default function NearbyDonations() {
           return;
         }
 
-        const res = await fetch("/api/donations/nearby", {
+        const res = await fetch(`${API_BASE}/donations/nearby`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 

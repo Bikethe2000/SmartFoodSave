@@ -24,7 +24,7 @@ export default function Predictions() {
     if (!user) return null;
     return await user.getIdToken();
   };
-
+  const API_BASE = 'https://foodwasteai-production.up.railway.app/api';
   const handlePredict = async () => {
     setLoading(true);
     setResult(null);
@@ -33,7 +33,7 @@ export default function Predictions() {
       const token = await getToken();
       if (!token) return;
 
-      const response = await fetch("/api/predict", {
+      const response = await fetch(`${API_BASE}/predict`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

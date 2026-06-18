@@ -5,7 +5,7 @@ export default function MealDictionary() {
   const [dictionary, setDictionary] = useState({});
   const [tags, setTags] = useState({});
   const [loading, setLoading] = useState(true);
-
+  const API_BASE = 'https://foodwasteai-production.up.railway.app/api';
   const getToken = async () => {
     const user = auth.currentUser;
     if (!user) return null;
@@ -18,10 +18,10 @@ export default function MealDictionary() {
       if (!token) return;
 
       const [dictRes, tagsRes] = await Promise.all([
-        fetch("/api/meals/dictionary", {
+        fetch(`${API_BASE}/meals/dictionary`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch("/api/meals/tags", {
+        fetch(`${API_BASE}/meals/tags`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -38,7 +38,7 @@ export default function MealDictionary() {
     const token = await getToken();
     if (!token) return;
 
-    await fetch("/api/meals/dictionary", {
+    await fetch(`${API_BASE}/meals/dictionary`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -47,7 +47,7 @@ export default function MealDictionary() {
       body: JSON.stringify({ dictionary }),
     });
 
-    await fetch("/api/meals/tags", {
+    await fetch(`${API_BASE}/meals/tags`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
