@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, HTTPException
 from firebase_admin import auth, firestore
-from flask import json
+import json
 
 router = APIRouter()
 
