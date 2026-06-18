@@ -17,7 +17,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY;
- 
+
 app.use(cors());
 app.use(express.json());
 
@@ -36,7 +36,11 @@ try {
     initializeApp({
       credential: cert(serviceAccount),
     });
-  } else if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
+  } else if (
+    process.env.FIREBASE_PROJECT_ID &&
+    process.env.FIREBASE_PRIVATE_KEY &&
+    process.env.FIREBASE_CLIENT_EMAIL
+  ) {
     initializeApp({
       credential: cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
@@ -53,8 +57,10 @@ try {
       initializeApp({
         credential: cert(serviceAccount),
       });
-    } catch  {
-      throw new Error('Firebase credentials not found. Please set up environment variables or provide serviceAccountKey.json');
+    } catch {
+      throw new Error(
+        'Firebase credentials not found. Please set up environment variables or provide serviceAccountKey.json'
+      );
     }
   }
 
@@ -126,6 +132,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Firebase backend is running' });
 });
 
+// -------- Contact form email (Gmail App Password) --------
 const gmailTransport = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 465,
@@ -141,6 +148,7 @@ const getContactPayload = (body) => {
   const email = (body?.email || '').toString().trim();
   const phone = (body?.phone || '').toString().trim();
   const message = (body?.message || '').toString().trim();
+
   if (!name || !email || !message) {
     return { valid: false, error: 'Missing required fields: name, email, message' };
   }
@@ -149,9 +157,12 @@ const getContactPayload = (body) => {
 
 app.post('/api/contact', async (req, res) => {
   try {
-    const { GMAIL_USER, CONTACT_TO_EMAIL } = process.env;
-    if (!GMAIL_USER || !process.env.GMAIL_APP_PASSWORD || !CONTACT_TO_EMAIL) {
-      return res.status(500).json({ error: 'Email service not configured. Set GMAIL_USER, GMAIL_APP_PASSWORD, CONTACT_TO_EMAIL.' });
+    const { GMAIL_USER, GMAIL_APP_PASSWORD, CONTACT_TO_EMAIL } = process.env;
+
+    if (!GMAIL_USER || !GMAIL_APP_PASSWORD || !CONTACT_TO_EMAIL) {
+      return res.status(500).json({
+        error: 'Email service not configured. Set GMAIL_USER, GMAIL_APP_PASSWORD, CONTACT_TO_EMAIL.',
+      });
     }
 
     const payload = getContactPayload(req.body);
@@ -159,8 +170,28 @@ app.post('/api/contact', async (req, res) => {
       return res.status(400).json({ detail: payload.error });
     }
 
+    const { name, email, phone, message } = payload;
+
     const mailOptions = {
       from: GMAIL_USER,
+      to: CONTACT_TO_EMAIL,
+      subject: `SmartFoodSave contact form: ${name}`,
+      text:
+        `You received a new contact form submission from SmartFoodSave.\n\n` +
+        `Name: ${name}\n` +
+        `Email: ${email}\n` +
+        `Phone: ${phone || '(not provided)'}\n\n` +
+        `Message:\n${message}\n`,
+    };
+
+    await gmailTransport.sendMail(mailOptions);
+
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error('Contact send failed:', error);
+    return res.status(500).json({ error: 'Failed to send message' });
+  }
+});
 
 // Backend login proxy using Firebase Auth REST API
 app.post('/api/auth/login', async (req, res) => {
@@ -224,7 +255,9 @@ app.get('/api/stats/weekly-waste', authenticate, async (req, res) => {
 app.get('/api/predictions/upcoming', authenticate, async (req, res) => {
   try {
     const predictions = await getPredictions(req.user.uid);
-    const upcoming = predictions.filter((prediction) => prediction.riskLevel === 'High' || prediction.riskLevel === 'Medium');
+    const upcoming = predictions.filter(
+      (prediction) => prediction.riskLevel === 'High' || prediction.riskLevel === 'Medium'
+    );
     res.json(upcoming);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -398,3 +431,4 @@ app.listen(PORT, () => {
   console.log(`✓ SmartFoodSave Backend running on port ${PORT}`);
   console.log('✓ Connected to Firestore');
 });
+

@@ -399,6 +399,143 @@ async def save_daily_logs(request: Request, user=Depends(authenticate)):
 
 
 # ---------------------------
+# CONTACT FORM
+# ---------------------------
+def contact_email_html(name, email, message, phone=None):
+    """Generate HTML for contact form email"""
+    phone_info = f"<p><strong>Phone:</strong> {phone}</p>" if phone else ""
+    return f"""
+    <html>
+      <body style="font-family: Arial, sans-serif; background-color: #f6f9fc; padding: 40px;">
+        <div style="max-width: 480px; margin: auto; background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+          
+          <div style="text-align: center; margin-bottom: 24px;">
+            <div style="display: inline-block; padding: 12px; background: #d1fae5; border-radius: 12px;">
+              <img src="https://img.icons8.com/emoji/48/green-salad-emoji.png" width="40" height="40" />
+            </div>
+            <h2 style="color: #064e3b; margin-top: 16px; font-size: 24px; font-weight: 800;">
+              New Contact Form Submission
+            </h2>
+          </div>
+
+          <p style="color: #334155; font-size: 16px; background-color: #f0fdf4; padding: 12px; border-left: 4px solid #059669; border-radius: 4px;">
+            <strong>From:</strong> {name} ({email})
+          </p>
+          {phone_info}
+
+          <hr style="margin: 24px 0; border: none; border-top: 1px solid #e2e8f0;" />
+
+          <h3 style="color: #1e293b; font-size: 16px; margin-top: 24px;">Message:</h3>
+          <div style="background-color: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #0ea5e9;">
+            <p style="color: #475569; font-size: 15px; line-height: 1.6; white-space: pre-wrap;">
+              {message}
+            </p>
+          </div>
+
+          <hr style="margin: 32px 0; border: none; border-top: 1px solid #e2e8f0;" />
+
+          <p style="color: #94a3b8; font-size: 12px; text-align: center;">
+            SmartFoodSave Contact Form © {datetime.utcnow().year}
+          </p>
+
+        </div>
+      </body>
+    </html>
+    """
+
+@app.post("/api/contact")
+async def send_contact_form(request: Request):
+    """Handle contact form submissions"""
+    try:
+        data = await request.json()
+        
+        # Validate required fields
+        name = data.get("name", "").strip()
+        email = data.get("email", "").strip()
+        message = data.get("message", "").strip()
+        phone = data.get("phone", "").strip()
+        
+        if not name or not email or not message:
+            raise HTTPException(status_code=400, detail="Missing required fields: name, email, message")
+        
+        # Validate email format
+        if "@" not in email:
+            raise HTTPException(status_code=400, detail="Invalid email address")
+        
+        # Get recipient email from environment
+        contact_recipient = os.getenv("CONTACT_FORM_RECIPIENT")
+        if not contact_recipient:
+            raise HTTPException(status_code=500, detail="Contact form not configured")
+        
+        # Send email to site admin
+        admin_subject = f"New Contact Form Submission from {name}"
+        admin_body = contact_email_html(name, email, message, phone if phone else None)
+        send_email(contact_recipient, admin_subject, admin_body)
+        
+        # Send confirmation email to user
+        user_subject = "We received your message - SmartFoodSave"
+        user_body = f"""
+        <html>
+          <body style="font-family: Arial, sans-serif; background-color: #f6f9fc; padding: 40px;">
+            <div style="max-width: 480px; margin: auto; background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+              
+              <div style="text-align: center; margin-bottom: 24px;">
+                <div style="display: inline-block; padding: 12px; background: #d1fae5; border-radius: 12px;">
+                  <img src="https://img.icons8.com/emoji/48/green-salad-emoji.png" width="40" height="40" />
+                </div>
+                <h2 style="color: #064e3b; margin-top: 16px; font-size: 24px; font-weight: 800;">
+                  Message Received
+                </h2>
+              </div>
+
+              <p style="color: #334155; font-size: 16px;">
+                Hello <strong>{name}</strong>,
+              </p>
+
+              <p style="color: #475569; font-size: 15px; line-height: 1.6;">
+                Thank you for contacting SmartFoodSave! We have received your message and will get back to you as soon as possible.
+              </p>
+
+              <div style="background-color: #f0fdf4; padding: 16px; border-radius: 8px; border-left: 4px solid #059669; margin: 24px 0;">
+                <p style="color: #065f46; font-size: 14px; margin: 0;">
+                  <strong>✓ Confirmation:</strong> Your message has been safely delivered.
+                </p>
+              </div>
+
+              <p style="color: #475569; font-size: 14px; line-height: 1.6;">
+                Our team typically responds within 24-48 hours. In the meantime, feel free to explore our documentation or FAQ section.
+              </p>
+
+              <hr style="margin: 32px 0; border: none; border-top: 1px solid #e2e8f0;" />
+
+              <p style="color: #94a3b8; font-size: 12px; text-align: center;">
+                SmartFoodSave © {datetime.utcnow().year}<br/>
+                AI‑powered food waste reduction for schools.
+              </p>
+
+            </div>
+          </body>
+        </html>
+        """
+        try:
+            send_email(email, user_subject, user_body)
+        except Exception as e:
+            print(f"Warning: Could not send confirmation email to {email}: {e}")
+        
+        return {
+            "success": True,
+            "message": "Your message has been sent successfully. We'll get back to you soon!",
+            "email": email
+        }
+    
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        print(f"Error processing contact form: {e}")
+        raise HTTPException(status_code=500, detail=f"Error processing contact form: {str(e)}")
+
+
+# ---------------------------
 # HEALTH CHECK
 # ---------------------------
 @app.get("/health")

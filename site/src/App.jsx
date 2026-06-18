@@ -12,6 +12,7 @@ import Settings from "./pages/Settings";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import SchoolBanner from "./components/SchoolBanner";
+import ContactForm from "./components/ContactForm";
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(api.isAuthenticated());
@@ -99,6 +100,9 @@ export default function App() {
             )
           }
         />
+
+        {/* Contact route */}
+        <Route path="/contact" element={<ContactForm />} />
 
         {/* Login route */}
         <Route
