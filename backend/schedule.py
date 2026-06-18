@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, HTTPException
 from firebase_admin import auth, firestore
+from flask import json
 
 router = APIRouter()
 
@@ -11,7 +12,9 @@ def get_db():
         import firebase_admin
         from firebase_admin import credentials
 
-        cred = credentials.Certificate("path/to/serviceAccountKey.json")
+
+        service_account = json.load(os.getenv("FIREBASE_SERVICE_ACCOUNT"))
+        cred = credentials.Certificate(service_account)
         firebase_admin.initialize_app(cred)
 
     return firestore.client()

@@ -71,8 +71,7 @@ def initialize_firebase():
                 service_account_path = str(candidate)
 
         if service_account_path:
-            with open(service_account_path, "r") as f:
-                service_account = json.load(f)
+            service_account = json.load(os.getenv("FIREBASE_SERVICE_ACCOUNT"))
             cred = credentials.Certificate(service_account)
             firebase_admin.initialize_app(cred)
             print(f"Using Firebase service account: {service_account_path}")

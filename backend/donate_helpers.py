@@ -11,7 +11,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 SYSTEM_EMAIL = os.getenv("SMTP_USER")
 SYSTEM_EMAIL_PASSWORD = os.getenv("SMTP_PASS")
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def build_directions_link(address):
     if not address:
