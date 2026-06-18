@@ -6,6 +6,7 @@ export default function Settings({ showConfidenceRanges, setShowConfidenceRanges
   const [schoolName, setSchoolName] = useState('');
   const [studentCount, setStudentCount] = useState('');
   const [portionSize, setPortionSize] = useState('');
+  const [city, setCity] = useState('');
   const [timezone, setTimezone] = useState('GMT+3');
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -44,6 +45,7 @@ export default function Settings({ showConfidenceRanges, setShowConfidenceRanges
         setSchoolName(data.schoolName || "");
         setStudentCount(data.studentCount || "");
         setPortionSize(data.portionSize || "");
+        setCity(data.location || "");
         setTimezone(data.timezone || "GMT+3");
         setShowConfidenceRanges(data.showConfidenceRanges || false);
 
@@ -80,6 +82,7 @@ export default function Settings({ showConfidenceRanges, setShowConfidenceRanges
           schoolName,
           studentCount,
           portionSize,
+          location: city,
           timezone,
           showConfidenceRanges
         })
@@ -129,6 +132,18 @@ export default function Settings({ showConfidenceRanges, setShowConfidenceRanges
                 type="text"
                 value={schoolName}
                 onChange={(e) => setSchoolName(e.target.value)}
+                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-emerald-500 text-slate-700"
+                required
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">City</label>
+              <input 
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="e.g., Athens, New York"
                 className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-emerald-500 text-slate-700"
                 required
               />

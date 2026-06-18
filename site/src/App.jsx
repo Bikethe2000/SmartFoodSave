@@ -15,6 +15,7 @@ import SchoolBanner from "./components/SchoolBanner";
 import WeeklySchedulePro from "./pages/WeeklySchedule";
 import AboutUs from "./pages/AboutUs";
 import Documentation from "./pages/Documentation";
+import ContactForm from "./components/ContactForm";
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(api.isAuthenticated());

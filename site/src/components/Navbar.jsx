@@ -35,6 +35,7 @@ export default function Navbar({ isAuthenticated: initialAuth }) {
               <Link to="/predictions" className="text-slate-700 hover:text-slate-900 font-medium">Predictions</Link>
               <Link to="/data" className="text-slate-700 hover:text-slate-900 font-medium">Data</Link>
               <Link to="/settings" className="text-slate-700 hover:text-slate-900 font-medium">Settings</Link>
+              <Link to="/contact" className="text-slate-700 hover:text-slate-900 font-medium">Contact</Link>
               <button onClick={handleLogout} className="ml-4 px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition font-medium">Logout</button>
             </>
           )}

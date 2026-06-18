@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { auth } from "../firebase";
+import NearbyDonations from "../components/NearbyDonations";
 import {
   LineChart,
   Line,
@@ -195,6 +196,8 @@ export default function Dashboard() {
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-fade-in mb-10">
       <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
+
+      <NearbyDonations />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <SummaryCard

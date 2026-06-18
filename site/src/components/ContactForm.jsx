@@ -29,7 +29,7 @@ export default function ContactForm() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/contact`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/contact`,
         {
           method: 'POST',
           headers: {
@@ -44,7 +44,6 @@ export default function ContactForm() {
         throw new Error(errorData.detail || 'Failed to send message');
       }
 
-      const result = await response.json();
       setSuccess(true);
       setFormData({ name: '', email: '', phone: '', message: '' });
       
@@ -58,7 +57,7 @@ export default function ContactForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 py-12 px-4 mt-12">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
