@@ -39,6 +39,9 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "https://food-waste-ai-bice.vercel.app/",
+        "https://food-waste-ai.vercel.app/",
+        
     ],
     allow_origin_regex=r"^http://localhost:\d+$",
     allow_credentials=True,
