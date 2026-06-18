@@ -6,7 +6,7 @@ import {
 } from 'firebase/auth';
 import { auth } from './firebase';
 
-const API_BASE = import.meta.env.VITE_API_BASE || '/api';
+const API_BASE = 'foodwasteai-production.up.railway.app/api'; // Replace with your actual API base URL
 let currentUser = null;
 
 onAuthStateChanged(auth, (user) => {
