@@ -27,22 +27,19 @@ export default function Navbar({ isAuthenticated: initialAuth }) {
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
         <Link to="/" className="font-extrabold text-xl text-emerald-600">SmartFoodSave</Link>
 
-        <nav className="flex items-center gap-4">
-          {/* <Link to="/" className="text-slate-700 hover:text-slate-900">Home</Link> */}
+        <nav className="flex items-center gap-6">
           {isAuthenticated && (
             <>
               <Link to="/dashboard" className="ml-200 text-slate-700 hover:text-slate-900">Dashboard</Link>
               <Link to="/predictions" className="text-slate-700 hover:text-slate-900">Predictions</Link>
               <Link to="/data" className="text-slate-700 hover:text-slate-900">Data</Link>
               <Link to="/settings" className="text-slate-700 hover:text-slate-900">Settings</Link>
-              <Link to="/contact" className="text-slate-700 hover:text-slate-900">Contact</Link>
               <button onClick={handleLogout} className="ml-4 px-3 py-1 bg-emerald-600 text-white rounded-md">Logout</button>
             </>
           )}
 
           {!isAuthenticated && (
             <>
-              <Link to="/contact" className="px-3 py-1 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-md">Contact</Link>
               <Link to="/login" className="px-3 py-1 bg-emerald-600 text-white rounded-md">Sign in</Link>
             </>
           )}
