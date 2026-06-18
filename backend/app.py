@@ -37,10 +37,11 @@ PORT = int(os.getenv("PORT", 5000))
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "https://food-waste-ai-bice.vercel.app",
-        "https://food-waste-ai.vercel.app",
+        "https://food-waste-ai-bice.vercel.app/",
+    "https://food-waste-ai.vercel.app/",
+    "https://foodwasteai-production.up.railway.app/api",
+    "https://foodwasteai-production.up.railway.app/api/",
+
     ],
     allow_credentials=True,
     allow_methods=["*"],
