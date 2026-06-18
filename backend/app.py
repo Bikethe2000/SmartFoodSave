@@ -36,13 +36,7 @@ PORT = int(os.getenv("PORT", 5000))
 # ---------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://food-waste-ai-bice.vercel.app/",
-    "https://food-waste-ai.vercel.app/",
-    "https://foodwasteai-production.up.railway.app/api",
-    "https://foodwasteai-production.up.railway.app/api/",
-
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -71,10 +65,15 @@ def initialize_firebase():
                 service_account_path = str(candidate)
 
         if service_account_path:
-            service_account = json.load(os.getenv("FIREBASE_SERVICE_ACCOUNT"))
+            service_account_json = os.getenv("FIREBASE_SERVICE_ACCOUNT")
+
+            if not service_account_json:
+                raise RuntimeError("Missing FIREBASE_SERVICE_ACCOUNT env variable")
+
+            service_account = json.loads(service_account_json)
             cred = credentials.Certificate(service_account)
             firebase_admin.initialize_app(cred)
-            print(f"Using Firebase service account: {service_account_path}")
+
         else:
             raise FileNotFoundError(
                 "Missing Firebase credentials; set FIREBASE_SERVICE_ACCOUNT_PATH or place serviceAccountKey.json in repo root"
