@@ -126,16 +126,24 @@ def to_item(doc):
 import resend
 
 def send_email(to, subject, body, reply_to=None):
-    resend.api_key = os.getenv("RESEND_API_KEY")
+    api_key = os.getenv("RESEND_API_KEY")
+    if not api_key:
+        raise RuntimeError("RESEND_API_KEY env var is not set")
+    
+    resend.api_key = api_key
+    
     payload = {
         "from": "SmartFoodSave <onboarding@resend.dev>",
-        "to": os.getenv("CONTACT_FORM_RECIPIENT"),  # always your own email
+        "to": [to],          # ← list, and actually uses the `to` param
         "subject": subject,
         "html": body,
     }
     if reply_to:
         payload["reply_to"] = reply_to
-    resend.Emails.send(payload)
+    
+    result = resend.Emails.send(payload)
+    print(f"📬 Resend result: {result}")
+    return result
 
 def otp_email_html(name, otp):
     return f"""
@@ -260,28 +268,41 @@ async def save_settings(request: Request, user=Depends(authenticate)):
 
 @app.post("/api/auth/send-otp")
 async def send_otp(request: Request):
-    data = await request.json()
-    email = data.get("email")
-    name = data.get("name")
+    import traceback
+    try:
+        data = await request.json()
+        email = data.get("email")
+        name = data.get("name")
 
-    if not email or not name:
-        raise HTTPException(400, "Missing fields")
+        print(f"📧 OTP request for email={email}, name={name}")
 
-    otp = str(random.randint(100000, 999999))
+        if not email or not name:
+            raise HTTPException(400, "Missing fields")
 
-    # store OTP temporarily
-    db.collection("otp").document(email).set(
-        {
+        otp = str(random.randint(100000, 999999))
+        print(f"🔑 Generated OTP: {otp}")
+
+        db.collection("otp").document(email).set({
             "otp": otp,
             "createdAt": datetime.utcnow(),
-        }
-    )
+        })
+        print("✅ OTP saved to Firestore")
 
-    html = otp_email_html(name, otp)
-    send_email(to=email, subject="Your SmartFoodSave Verification Code", body=html)
+        html = otp_email_html(name, otp)
+        print(f"📨 Sending email via Resend to {email}")
+        print(f"   RESEND_API_KEY set: {bool(os.getenv('RESEND_API_KEY'))}")
 
-    return {"status": "sent"}
+        send_email(to=email, subject="Your SmartFoodSave Verification Code", body=html)
+        print("✅ Email sent successfully")
 
+        return {"status": "sent"}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ send-otp crashed: {e}")
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/auth/verify-otp")
 async def verify_otp(request: Request):
