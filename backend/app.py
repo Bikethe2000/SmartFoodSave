@@ -42,6 +42,8 @@ ALLOWED_ORIGINS = [
     "https://foodwasteai-production.up.railway.app",
     "https://www.smartfoodsave.xyz",
     "https://smartfoodsave.xyz",
+    "https://www.smartfoodsave.xyz/signup",
+    "https://www.smartfoodsave.xyz/"
 ]
 
 app.add_middleware(

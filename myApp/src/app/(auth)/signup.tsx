@@ -2,7 +2,7 @@
  * app/(auth)/signup.tsx
  */
 import { useRouter } from "expo-router";
-import SignupScreen from "../../auth/SignupScreen";
+import SignupScreen from "../../auth/AuthScreens";
 
 export default function SignupPage() {
   const router = useRouter();

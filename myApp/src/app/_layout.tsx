@@ -7,7 +7,7 @@
  */
 import { useEffect } from "react";
 import { Slot, useRouter, useSegments } from "expo-router";
-import { AuthProvider, useAuth } from "../context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
 function RouteGuard() {
   const { userToken, loading } = useAuth();
