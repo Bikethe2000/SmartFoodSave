@@ -47,8 +47,8 @@ app.add_middleware(
         "https://foodwasteai-production.up.railway.app/",
     ],
     allow_credentials=False,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 PORT = int(os.getenv("PORT", 5000))
 
