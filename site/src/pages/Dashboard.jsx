@@ -80,19 +80,12 @@ export default function Dashboard() {
       });
 
       const data = await res.json();
-      let schedule = data.schedule;
+      let schedule = data.schedule || {}; // ← never null
 
-      if (!schedule || Object.keys(schedule).length === 0) {
-        
-
-        await fetch(`${API_BASE}/schedule`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ schedule }),
-        });
+      if (Object.keys(schedule).length === 0) {
+        // No schedule yet — just set empty, don't POST null
+        setDefaultSchedule({});
+        return;
       }
 
       const normalized = {};
@@ -105,6 +98,8 @@ export default function Dashboard() {
 
     loadSchedule();
   }, []);
+
+
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto text-center py-10 text-slate-500">
