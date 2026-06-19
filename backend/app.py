@@ -123,27 +123,25 @@ def to_item(doc):
     return data
 
 
-import resend
+def send_email_gmail(to: str, subject: str, body: str):
+    smtp_user = os.getenv("GMAIL_USER")       # bikethe200.dev@gmail.com
+    smtp_pass = os.getenv("GMAIL_APP_PASS")   # Gmail App Password
 
-def send_email(to, subject, body, reply_to=None):
-    api_key = os.getenv("RESEND_API_KEY")
-    if not api_key:
-        raise RuntimeError("RESEND_API_KEY env var is not set")
-    
-    resend.api_key = api_key
-    
-    payload = {
-        "from": "SmartFoodSave <onboarding@resend.dev>",
-        "to": [to],          # ← list, and actually uses the `to` param
-        "subject": subject,
-        "html": body,
-    }
-    if reply_to:
-        payload["reply_to"] = reply_to
-    
-    result = resend.Emails.send(payload)
-    print(f"📬 Resend result: {result}")
-    return result
+    if not smtp_user or not smtp_pass:
+        raise RuntimeError("GMAIL_USER or GMAIL_APP_PASS env var is not set")
+
+    msg = MIMEMultipart()
+    msg["From"] = smtp_user
+    msg["To"] = to
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "html"))
+
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        server.starttls()
+        server.login(smtp_user, smtp_pass)
+        server.sendmail(smtp_user, to, msg.as_string())
+
+    print(f"✅ Gmail SMTP sent to {to}")
 
 def otp_email_html(name, otp):
     return f"""
@@ -268,41 +266,28 @@ async def save_settings(request: Request, user=Depends(authenticate)):
 
 @app.post("/api/auth/send-otp")
 async def send_otp(request: Request):
-    import traceback
+    data = await request.json()
+    email = data.get("email")
+    name = data.get("name")
+
+    if not email or not name:
+        raise HTTPException(400, "Missing fields")
+
+    otp = str(random.randint(100000, 999999))
+
+    db.collection("otp").document(email).set({
+        "otp": otp,
+        "createdAt": datetime.utcnow(),
+    })
+
     try:
-        data = await request.json()
-        email = data.get("email")
-        name = data.get("name")
-
-        print(f"📧 OTP request for email={email}, name={name}")
-
-        if not email or not name:
-            raise HTTPException(400, "Missing fields")
-
-        otp = str(random.randint(100000, 999999))
-        print(f"🔑 Generated OTP: {otp}")
-
-        db.collection("otp").document(email).set({
-            "otp": otp,
-            "createdAt": datetime.utcnow(),
-        })
-        print("✅ OTP saved to Firestore")
-
         html = otp_email_html(name, otp)
-        print(f"📨 Sending email via Resend to {email}")
-        print(f"   RESEND_API_KEY set: {bool(os.getenv('RESEND_API_KEY'))}")
-
-        send_email(to=email, subject="Your SmartFoodSave Verification Code", body=html)
-        print("✅ Email sent successfully")
-
-        return {"status": "sent"}
-
-    except HTTPException:
-        raise
+        send_email_gmail(to=email, subject="Your SmartFoodSave Verification Code", body=html)
     except Exception as e:
-        print(f"❌ send-otp crashed: {e}")
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"❌ Failed to send OTP email: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
+
+    return {"status": "sent"}
 
 @app.post("/api/auth/verify-otp")
 async def verify_otp(request: Request):
