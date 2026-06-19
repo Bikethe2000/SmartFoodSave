@@ -120,19 +120,18 @@ def to_item(doc):
 
 import resend
 
-def send_email(to, subject, body):
+def send_email(to, subject, body, reply_to=None):
     resend.api_key = os.getenv("RESEND_API_KEY")
-    try:
-        resend.Emails.send({
-            "from": "SmartFoodSave <onboarding@resend.dev>",
-            "to": to,
-            "subject": subject,
-            "html": body,
-        })
-        print(f"✓ Email sent to {to}")
-    except Exception as e:
-        print("✗ Failed to send email:", e)
-        raise
+    payload = {
+        "from": "SmartFoodSave <onboarding@resend.dev>",
+        "to": os.getenv("CONTACT_FORM_RECIPIENT"),  # always your own email
+        "subject": subject,
+        "html": body,
+    }
+    if reply_to:
+        payload["reply_to"] = reply_to
+    resend.Emails.send(payload)
+    
 
 def otp_email_html(name, otp):
     return f"""
