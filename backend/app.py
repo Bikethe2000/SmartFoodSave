@@ -8,7 +8,7 @@ from engine.predict import router as predict_router
 from schedule import router as schedule_router
 from fastapi import FastAPI, Request, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 
 from dotenv import load_dotenv
 import uvicorn
@@ -21,10 +21,11 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from donate_helpers import (
-    geocode_city,  ai_find_donation_points, google_maps_lookup,
+    geocode_city, ai_find_donation_points, google_maps_lookup,
     google_place_details, ai_enrich, haversine,
     donation_email, build_directions_link
 )
+
 load_dotenv()
 
 app = FastAPI()
@@ -32,28 +33,48 @@ app = FastAPI()
 # ---------------------------
 # CORS
 # ---------------------------
-# Enables browser access from the Vercel frontend by responding to CORS preflight
-# requests with the proper Access-Control-* headers.
+ALLOWED_ORIGINS = [
+    "https://food-waste-ai-bice.vercel.app",
+    "http://food-waste-ai-bice.vercel.app",
+    "http://localhost:5174",
+    "https://foodwasteai-production.up.railway.app",
+    "https://www.smartfoodsave.xyz",
+    "https://smartfoodsave.xyz",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://food-waste-ai-bice.vercel.app",
-        "https://food-waste-ai-bice.vercel.app/",
-        "http://localhost:5174",
-        "http://localhost:5174/",
-        "http://food-waste-ai-bice.vercel.app",
-        "http://food-waste-ai-bice.vercel.app/",
-        "https://foodwasteai-production.up.railway.app",
-        "https://foodwasteai-production.up.railway.app/",
-    ],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "Accept"],
+    expose_headers=["*"],
+    max_age=600,
 )
+
 PORT = int(os.getenv("PORT", 5000))
 
 db = None
 FIREBASE_API_KEY = os.getenv("FIREBASE_API_KEY")
+
+
+# ---------------------------
+# Explicit OPTIONS handler for /api/contact
+# Ensures CORS preflight never hits a 400
+# ---------------------------
+@app.options("/api/contact")
+async def contact_options(request: Request):
+    origin = request.headers.get("origin", "")
+    allowed = origin if origin in ALLOWED_ORIGINS else ALLOWED_ORIGINS[0]
+    return Response(
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Origin": allowed,
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept",
+            "Access-Control-Max-Age": "600",
+        },
+    )
 
 
 # ---------------------------
@@ -84,7 +105,8 @@ def initialize_firebase():
 
         else:
             raise FileNotFoundError(
-                "Missing Firebase credentials; set FIREBASE_SERVICE_ACCOUNT_PATH or place serviceAccountKey.json in repo root"
+                "Missing Firebase credentials; set FIREBASE_SERVICE_ACCOUNT_PATH "
+                "or place serviceAccountKey.json in repo root"
             )
 
         db = firestore.client()
@@ -124,8 +146,8 @@ def to_item(doc):
 
 
 def send_email_gmail(to: str, subject: str, body: str):
-    smtp_user = os.getenv("GMAIL_USER")       # bikethe200.dev@gmail.com
-    smtp_pass = os.getenv("GMAIL_APP_PASS")   # Gmail App Password
+    smtp_user = os.getenv("GMAIL_USER")
+    smtp_pass = os.getenv("GMAIL_APP_PASS")
 
     if not smtp_user or not smtp_pass:
         raise RuntimeError("GMAIL_USER or GMAIL_APP_PASS env var is not set")
@@ -142,6 +164,7 @@ def send_email_gmail(to: str, subject: str, body: str):
         server.sendmail(smtp_user, to, msg.as_string())
 
     print(f"✅ Gmail SMTP sent to {to}")
+
 
 def otp_email_html(name, otp):
     return f"""
@@ -163,7 +186,7 @@ def otp_email_html(name, otp):
           </p>
 
           <p style="color: #475569; font-size: 15px; line-height: 1.6;">
-            Thank you for signing up to <strong>SmartFoodSave</strong>!  
+            Thank you for signing up to <strong>SmartFoodSave</strong>!
             To complete your registration, please enter the verification code below:
           </p>
 
@@ -183,8 +206,8 @@ def otp_email_html(name, otp):
           </div>
 
           <p style="color: #475569; font-size: 14px; line-height: 1.6;">
-            This code will expire in <strong>10 minutes</strong>.  
-            If you didn’t request this, you can safely ignore this email.
+            This code will expire in <strong>10 minutes</strong>.
+            If you didn't request this, you can safely ignore this email.
           </p>
 
           <hr style="margin: 32px 0; border: none; border-top: 1px solid #e2e8f0;" />
@@ -242,7 +265,7 @@ async def save_settings(request: Request, user=Depends(authenticate)):
         }
     )
 
-    # Also update the users profile with the school and clear isNew flag
+    # Also update the user's profile with the school and clear isNew flag
     try:
         db.collection("users").document(user["uid"]).set(
             {
@@ -264,6 +287,9 @@ async def save_settings(request: Request, user=Depends(authenticate)):
     return {"status": "ok"}
 
 
+# ---------------------------
+# AUTH ENDPOINTS
+# ---------------------------
 @app.post("/api/auth/send-otp")
 async def send_otp(request: Request):
     data = await request.json()
@@ -282,12 +308,20 @@ async def send_otp(request: Request):
 
     try:
         html = otp_email_html(name, otp)
-        send_email_gmail(to=email, subject="Your SmartFoodSave Verification Code", body=html)
+
+        resend.api_key = os.getenv("RESEND_API_KEY")
+        resend.Emails.send({
+            "from": "SmartFoodSave <onboarding@resend.dev>",
+            "to": [os.getenv("RESEND_DEV_EMAIL")],
+            "subject": f"OTP for {email}: Your SmartFoodSave Verification Code",
+            "html": html,
+        })
     except Exception as e:
         print(f"❌ Failed to send OTP email: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
 
     return {"status": "sent"}
+
 
 @app.post("/api/auth/verify-otp")
 async def verify_otp(request: Request):
@@ -304,10 +338,10 @@ async def verify_otp(request: Request):
     if doc.to_dict()["otp"] != otp:
         raise HTTPException(400, "Invalid OTP")
 
-    # create Firebase user
+    # Create Firebase user
     user = auth.create_user(email=email, password=password, display_name=name)
 
-    # create a basic user profile in Firestore
+    # Create a basic user profile in Firestore
     try:
         db.collection("users").document(user.uid).set(
             {
@@ -322,7 +356,7 @@ async def verify_otp(request: Request):
     except Exception as e:
         print("Warning: failed to create user profile in Firestore:", e)
 
-    # delete OTP
+    # Delete OTP
     db.collection("otp").document(email).delete()
 
     return {"status": "verified", "uid": user.uid}
@@ -350,10 +384,8 @@ async def get_daily_logs(user=Depends(authenticate)):
     try:
         school = get_user_school(user["uid"])
     except HTTPException:
-        # School not set yet, return empty logs
         return []
 
-    # Get all logs for this school across all dates
     logs_ref = db.collection("daily_logs")
     docs = logs_ref.where("school", "==", school).stream()
 
@@ -362,7 +394,6 @@ async def get_daily_logs(user=Depends(authenticate)):
         doc_logs = doc.to_dict().get("logs", [])
         all_logs.extend(doc_logs)
 
-    # Sort by date descending
     all_logs.sort(key=lambda x: x.get("date", ""), reverse=True)
     return all_logs
 
@@ -380,13 +411,11 @@ async def save_daily_logs(request: Request, user=Depends(authenticate)):
 
         ref = db.collection("daily_logs").document(doc_id)
 
-        # Get existing logs for this school_date
         doc = ref.get()
         existing_logs = []
         if doc.exists:
             existing_logs = doc.to_dict().get("logs", [])
 
-        # Create new log entry with ID and timestamp
         new_log = {
             "id": f"log-{int(datetime.utcnow().timestamp() * 1000)}",
             "date": log_date,
@@ -401,12 +430,10 @@ async def save_daily_logs(request: Request, user=Depends(authenticate)):
 
         print(f"✅ New log entry: {new_log}")
 
-        # Append to existing logs
         existing_logs.append(new_log)
 
         print(f"📝 About to save {len(existing_logs)} logs for doc_id: {doc_id}")
 
-        # Save updated logs with school reference
         ref.set(
             {
                 "school": school,
@@ -422,11 +449,13 @@ async def save_daily_logs(request: Request, user=Depends(authenticate)):
     except Exception as e:
         print(f"❌ Error saving daily log: {e}")
         import traceback
-
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Failed to save log: {str(e)}")
 
 
+# ---------------------------
+# SCHEDULE ENDPOINTS
+# ---------------------------
 @app.post("/api/schedule")
 async def save_schedule(request: Request, user=Depends(authenticate)):
     data = await request.json()
@@ -475,6 +504,9 @@ async def get_schedule(user=Depends(authenticate)):
     return {"schedule": doc.to_dict().get("schedule", {})}
 
 
+# ---------------------------
+# MEALS ENDPOINTS
+# ---------------------------
 @app.get("/api/meals/dictionary")
 async def get_meal_dictionary(user=Depends(authenticate)):
     school = get_user_school(user["uid"])
@@ -491,9 +523,7 @@ async def save_meal_dictionary(request: Request, user=Depends(authenticate)):
     dictionary = data.get("dictionary", {})
 
     db.collection("school_meals").document(school).set(
-        {
-            "dictionary": dictionary,
-        },
+        {"dictionary": dictionary},
         merge=True,
     )
 
@@ -516,9 +546,7 @@ async def save_meal_tags(request: Request, user=Depends(authenticate)):
     tags = data.get("tags", {})
 
     db.collection("school_meals").document(school).set(
-        {
-            "tags": tags,
-        },
+        {"tags": tags},
         merge=True,
     )
 
@@ -539,14 +567,12 @@ async def normalize_meal(request: Request, user=Depends(authenticate)):
 
     suggestions = []
 
-    # 1) Match από dictionary
     for meal, keywords in dictionary.items():
         for kw in keywords:
             if kw.lower() in raw:
                 suggestions.append(meal)
                 break
 
-    # 2) Fallback rules
     if not suggestions:
         if "pasta" in raw or "makaron" in raw:
             suggestions = [
@@ -579,7 +605,6 @@ async def combine_meal(request: Request, user=Depends(authenticate)):
     if not raw:
         return {"input": raw, "suggestions": []}
 
-    # Split into components
     parts = [
         p.strip()
         for p in raw.replace("+", ",").replace("/", ",").replace("and", ",").split(",")
@@ -588,7 +613,6 @@ async def combine_meal(request: Request, user=Depends(authenticate)):
     mains = []
     sides = []
 
-    # Identify main categories
     main_keywords = {
         "pasta": ["pasta", "makaron", "spaghetti"],
         "chicken": ["chicken", "kotop"],
@@ -606,7 +630,6 @@ async def combine_meal(request: Request, user=Depends(authenticate)):
         "potatoes": ["potato", "patates"],
     }
 
-    # Detect main & sides
     for part in parts:
         found_main = False
         for main, kws in main_keywords.items():
@@ -622,10 +645,6 @@ async def combine_meal(request: Request, user=Depends(authenticate)):
                 sides.append(side)
                 break
 
-    # Build suggestions
-    suggestions = []
-
-    # MAIN MEAL OPTIONS
     if "pasta" in mains:
         base = ["Pasta Bolognese", "Pasta Carbonara", "Pasta Alfredo", "Pasta Napoli"]
     elif "chicken" in mains:
@@ -635,7 +654,6 @@ async def combine_meal(request: Request, user=Depends(authenticate)):
     else:
         base = ["Unknown Meal"]
 
-    # Add sides
     final_suggestions = []
     for meal in base:
         if sides:
@@ -659,7 +677,6 @@ async def get_nearby_donations(user=Depends(authenticate)):
     user_email = user["email"]
     user_language = user.get("language", "en")
 
-    # Load city
     settings_doc = db.collection("settings").document(user_uid).get()
     if not settings_doc.exists:
         return {"donations": []}
@@ -668,21 +685,19 @@ async def get_nearby_donations(user=Depends(authenticate)):
     if not user_city:
         return {"donations": [], "message": "No city set"}
 
-    # City → lat/lon
     geo = await geocode_city(user_city)
     if not geo:
         return {"donations": [], "message": "City not found"}
 
     user_lat, user_lon = geo["lat"], geo["lon"]
 
-    # AI search
     raw_ai_points = await ai_find_donation_points(user_city)
 
     try:
         ai_points = json.loads(raw_ai_points)
         if not isinstance(ai_points, list):
             ai_points = []
-    except:
+    except Exception:
         ai_points = []
 
     donations = []
@@ -700,7 +715,6 @@ async def get_nearby_donations(user=Depends(authenticate)):
             if not name or not address:
                 continue
 
-            # If AI didn't give lat/lon → geocode
             if lat is None or lon is None:
                 geo2 = await google_maps_lookup(address)
                 if not geo2 or not geo2.get("location"):
@@ -708,16 +722,13 @@ async def get_nearby_donations(user=Depends(authenticate)):
                 lat = geo2["location"]["lat"]
                 lon = geo2["location"]["lng"]
 
-            # Distance
             distance = haversine(user_lat, user_lon, lat, lon)
 
-            # Google details
             place_details = None
             geo_details = await google_maps_lookup(address)
             if geo_details and geo_details.get("place_id"):
                 place_details = await google_place_details(geo_details["place_id"])
 
-            # AI enrichment
             raw_for_enrich = {
                 "name": name,
                 "address": address,
@@ -730,7 +741,7 @@ async def get_nearby_donations(user=Depends(authenticate)):
 
             try:
                 enriched = json.loads(enriched_json)
-            except:
+            except Exception:
                 enriched = raw_for_enrich
 
             enriched["distance"] = f"{distance} km"
@@ -742,31 +753,27 @@ async def get_nearby_donations(user=Depends(authenticate)):
             print("Error processing AI point:", e)
             continue
 
-    # Send email
     if donations:
         subject, body = donation_email(user_language, donations[0])
-        send_email(user_email, subject, body)
+        send_email_gmail(user_email, subject, body)
 
     return {
         "donations": donations,
         "city": user_city,
-        "count": len(donations)
+        "count": len(donations),
     }
-
-app.include_router(predict_router, prefix="/api/predict", tags=["predict"])
 
 
 # ---------------------------
 # CONTACT FORM
 # ---------------------------
 def contact_email_html(name, email, message, phone=None):
-    """Generate HTML for contact form email"""
     phone_info = f"<p><strong>Phone:</strong> {phone}</p>" if phone else ""
     return f"""
     <html>
       <body style="font-family: Arial, sans-serif; background-color: #f6f9fc; padding: 40px;">
         <div style="max-width: 480px; margin: auto; background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-          
+
           <div style="text-align: center; margin-bottom: 24px;">
             <div style="display: inline-block; padding: 12px; background: #d1fae5; border-radius: 12px;">
               <img src="https://img.icons8.com/emoji/48/green-salad-emoji.png" width="40" height="40" />
@@ -802,11 +809,14 @@ def contact_email_html(name, email, message, phone=None):
     """
 
 
-def send_contact_emails(user_email, user_name, admin_body, user_body):
-    smtp_user = os.getenv("GMAIL_USER")      # your gmail: bikethe200.dev@gmail.com
-    smtp_pass = os.getenv("GMAIL_APP_PASS")  # Gmail App Password (not your real password)
+def send_contact_emails(user_email: str, user_name: str, admin_body: str, user_body: str):
+    smtp_user = os.getenv("GMAIL_USER")
+    smtp_pass = os.getenv("GMAIL_APP_PASS")
 
-    def send(to, subject, body):
+    if not smtp_user or not smtp_pass:
+        raise RuntimeError("GMAIL_USER or GMAIL_APP_PASS env var is not set")
+
+    def send(to: str, subject: str, body: str):
         msg = MIMEMultipart()
         msg["From"] = smtp_user
         msg["To"] = to
@@ -817,14 +827,13 @@ def send_contact_emails(user_email, user_name, admin_body, user_body):
             server.login(smtp_user, smtp_pass)
             server.sendmail(smtp_user, to, msg.as_string())
 
-    # Email to you
     send(smtp_user, "New Contact Form Submission", admin_body)
-    # Confirmation to user
     send(user_email, "We received your message - SmartFoodSave", user_body)
-    
+
+
 @app.post("/api/contact")
 async def send_contact_form(request: Request):
-    """Handle contact form submissions"""
+    """Handle contact form submissions — no auth required"""
     try:
         data = await request.json()
 
@@ -834,7 +843,10 @@ async def send_contact_form(request: Request):
         phone = data.get("phone", "").strip()
 
         if not name or not email or not message:
-            raise HTTPException(status_code=400, detail="Missing required fields: name, email, message")
+            raise HTTPException(
+                status_code=400,
+                detail="Missing required fields: name, email, message",
+            )
 
         if "@" not in email:
             raise HTTPException(status_code=400, detail="Invalid email address")
@@ -877,13 +889,21 @@ async def send_contact_form(request: Request):
             "email": email,
         }
 
-    except HTTPException as e:
-        raise e
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Error processing contact form: {e}")
-        raise HTTPException(status_code=500, detail=f"Error processing contact form: {str(e)}")
-app.include_router(predict_router, prefix="/api/predict", tags=["predict"])
+        print(f"❌ Error processing contact form: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error processing contact form: {str(e)}",
+        )
 
+
+# ---------------------------
+# ROUTERS  (included once)
+# ---------------------------
+app.include_router(predict_router, prefix="/api/predict", tags=["predict"])
+app.include_router(schedule_router, prefix="/api/schedule-router", tags=["schedule"])
 
 
 # ---------------------------
@@ -899,6 +919,5 @@ async def health():
 # ---------------------------
 initialize_firebase()
 
-
 if __name__ == "__main__":
-    uvicorn.run(app, host="localhost", port=PORT)
+    uvicorn.run(app, host="0.0.0.0", port=PORT)

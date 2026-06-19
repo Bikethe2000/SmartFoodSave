@@ -45,7 +45,7 @@ export default function Navbar({ isAuthenticated: initialAuth }) {
             <>
               <Link to="/" className="sf-text hover:sf-primary font-medium transition">Home</Link>
               <Link to="/about" className="sf-text hover:sf-primary font-medium transition">About Us</Link>
-              <Link to="http://localhost:5174/" className="sf-text hover:sf-primary font-medium transition">Documentation</Link>
+              <Link to="https://docs.smartfoodsave.xyz" className="sf-text hover:sf-primary font-medium transition">Documentation</Link>
               <Link to="/login" className="px-4 py-2 sf-primary-bg text-white rounded-md hover:opacity-90 transition font-medium" style={{ color: 'white' }}
 >Sign in</Link>
             </>

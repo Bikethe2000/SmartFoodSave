@@ -193,7 +193,7 @@ export default function AboutUs() {
             {/* Member 2 */}
             <div className="sf-bg p-8 rounded-xl shadow-sm">
               <img
-                src="/images/team/anas.png"
+                src="/images/team/soulis.jpg"
                 alt="Anastasis"
                 className="h-40 w-40 object-cover rounded-full mx-auto mb-4 shadow-md"
               />
