@@ -131,7 +131,6 @@ def send_email(to, subject, body, reply_to=None):
     if reply_to:
         payload["reply_to"] = reply_to
     resend.Emails.send(payload)
-    
 
 def otp_email_html(name, otp):
     return f"""
@@ -825,7 +824,7 @@ async def send_contact_form(request: Request):
         admin_body = contact_email_html(
             name, email, message, phone if phone else None
         )
-        send_email(contact_recipient, admin_subject, admin_body)
+        send_email(contact_recipient, admin_subject, admin_body, reply_to=email)
 
         # Send confirmation email to user
         user_subject = "We received your message - SmartFoodSave"
