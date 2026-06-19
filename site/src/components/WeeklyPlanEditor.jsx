@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
 // Icons (Apple-style minimal)
@@ -63,14 +63,11 @@ export default function WeeklyPlanEditor({ school }) {
     }));
   };
 
+  // In savePlan(), change updateDoc to setDoc:
   const savePlan = async () => {
     setSaving(true);
-
     const ref = doc(db, "school_schedules", school);
-    await updateDoc(ref, {
-      weekly_plan: plan,
-    });
-
+    await setDoc(ref, { weekly_plan: plan }, { merge: true }); // ← was updateDoc
     setSaving(false);
   };
 
