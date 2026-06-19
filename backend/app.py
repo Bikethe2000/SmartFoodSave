@@ -286,6 +286,7 @@ async def save_settings(request: Request, user=Depends(authenticate)):
 
     return {"status": "ok"}
 
+import resend
 
 # ---------------------------
 # AUTH ENDPOINTS
