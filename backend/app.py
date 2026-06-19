@@ -36,12 +36,15 @@ PORT = int(os.getenv("PORT", 5000))
 # ---------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://food-waste-ai-bice.vercel.app",
+        "http://localhost:5173",  # for local dev
+        "https://foodwasteai-production.up.railway.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 
 db = None
@@ -115,31 +118,21 @@ def to_item(doc):
     return data
 
 
+import resend
+
 def send_email(to, subject, body):
-    smtp_host = os.getenv("SMTP_HOST")
-    smtp_port = int(os.getenv("SMTP_PORT", 587))
-    smtp_user = os.getenv("SMTP_USER")
-    smtp_pass = os.getenv("SMTP_PASS")
-
-    msg = MIMEMultipart()
-    msg["From"] = smtp_user
-    msg["To"] = to
-    msg["Subject"] = subject
-
-    msg.attach(MIMEText(body, "html"))
-
+    resend.api_key = os.getenv("RESEND_API_KEY")
     try:
-        server = smtplib.SMTP(smtp_host, smtp_port)
-        server.starttls()
-        server.login(smtp_user, smtp_pass)
-        server.sendmail(smtp_user, to, msg.as_string())
-        server.quit()
+        resend.Emails.send({
+            "from": "SmartFoodSave <onboarding@resend.dev>",
+            "to": to,
+            "subject": subject,
+            "html": body,
+        })
         print(f"✓ Email sent to {to}")
     except Exception as e:
         print("✗ Failed to send email:", e)
         raise
-
-
 
 def otp_email_html(name, otp):
     return f"""
