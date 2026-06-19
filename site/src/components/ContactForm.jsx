@@ -29,7 +29,7 @@ export default function ContactForm() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'http://foodwasteai-production.up.railway.app'}/api/contact`,
+        `${import.meta.env.VITE_API_URL || 'https://foodwasteai-production.up.railway.app'}/api/contact`,
         {
           method: 'POST',
           headers: {
