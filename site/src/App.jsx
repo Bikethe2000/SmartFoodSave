@@ -69,20 +69,18 @@ export default function App() {
       <div className="sf-bg sf-text min-h-screen">
         <Navbar isAuthenticated={isAuthenticated} />
 
-        {/* Main content with margin to account for fixed navbar */}
-        <main className="pt-20">
-          {/* Inline banner shown on protected routes when profile incomplete */}
-          {isAuthenticated &&
-            settingsLoaded &&
-            (!settings || !settings.schoolName) &&
-            ["/dashboard", "/predictions", "/data", "/actions", "/settings"].includes(clientPath) && (
-              <SchoolBanner
-                initialSettings={settings || {}}
-                onSaved={(s) => setSettings({ ...settings, ...s })}
-              />
-            )}
+        {/* Inline banner shown on protected routes when profile incomplete */}
+        {isAuthenticated &&
+          settingsLoaded &&
+          (!settings || !settings.schoolName) &&
+          ["/dashboard", "/predictions", "/data", "/actions", "/settings"].includes(clientPath) && (
+            <SchoolBanner
+              initialSettings={settings || {}}
+              onSaved={(s) => setSettings({ ...settings, ...s })}
+            />
+          )}
 
-          <Routes>
+        <Routes>
           {/* Public pages */}
           <Route path="/" element={<Landing />} />
           <Route path="/about" element={<AboutUs />} />
@@ -139,8 +137,7 @@ export default function App() {
       
         {/* Fallback */}
          <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        </main>
+      </Routes>
       </div>
     </Router>
 
