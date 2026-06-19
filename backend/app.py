@@ -39,6 +39,12 @@ app.add_middleware(
     allow_origins=[
         "https://food-waste-ai-bice.vercel.app",
         "https://food-waste-ai-bice.vercel.app/",
+        "http://localhost:5174",
+        "http://localhost:5174/",
+        "http://food-waste-ai-bice.vercel.app",
+        "http://food-waste-ai-bice.vercel.app/",
+        "https://foodwasteai-production.up.railway.app",
+        "https://foodwasteai-production.up.railway.app/",
     ],
     allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
