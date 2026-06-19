@@ -9,7 +9,7 @@ from schedule import router as schedule_router
 from fastapi import FastAPI, Request, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
-
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 import uvicorn
 
@@ -232,7 +232,7 @@ def otp_email_html(name, otp):
 # ---------------------------
 def cleanup_expired_otps():
     otp_docs = db.collection("otp").stream()
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
     for doc in otp_docs:
         data = doc.to_dict()
