@@ -4,7 +4,7 @@ import { api } from "../api";
 // ─── Constants ────────────────────────────────────────────────────────────────
 const EMAIL_RE   = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const OTP_RE     = /^\d{6}$/;
-const API_BASE   = import.meta.env.VITE_API_URL || "http://localhost:5001";
+const API_BASE   = import.meta.env.VITE_API_URL || "http://foodwasteai-production.up.railway.app";
 
 // ─── Password strength ────────────────────────────────────────────────────────
 function calcStrength(pw) {
