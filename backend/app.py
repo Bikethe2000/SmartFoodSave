@@ -28,6 +28,22 @@ from donate_helpers import (
 load_dotenv()
 
 app = FastAPI()
+
+# ---------------------------
+# CORS
+# ---------------------------
+# Enables browser access from the Vercel frontend by responding to CORS preflight
+# requests with the proper Access-Control-* headers.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://food-waste-ai-bice.vercel.app",
+        "https://food-waste-ai-bice.vercel.app/",
+    ],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
+)
 PORT = int(os.getenv("PORT", 5000))
 
 db = None
