@@ -26,6 +26,8 @@ from donate_helpers import (
     donation_email, build_directions_link
 )
 
+import resend
+
 load_dotenv()
 
 app = FastAPI()
@@ -224,6 +226,22 @@ def otp_email_html(name, otp):
 
 
 # ---------------------------
+# OTP helpers
+# ---------------------------
+def cleanup_expired_otps():
+    otp_docs = db.collection("otp").stream()
+    now = datetime.utcnow()
+
+    for doc in otp_docs:
+        data = doc.to_dict()
+        created = data.get("createdAt")
+        if created:
+            age_minutes = (now - created).total_seconds() / 60
+            if age_minutes > 10:
+                db.collection("otp").document(doc.id).delete()
+
+
+# ---------------------------
 # SETTINGS ENDPOINT
 # ---------------------------
 @app.get("/api/settings")
@@ -286,7 +304,6 @@ async def save_settings(request: Request, user=Depends(authenticate)):
 
     return {"status": "ok"}
 
-import resend
 
 # ---------------------------
 # AUTH ENDPOINTS
@@ -300,26 +317,50 @@ async def send_otp(request: Request):
     if not email or not name:
         raise HTTPException(400, "Missing fields")
 
+    # Cleanup old OTPs
+    cleanup_expired_otps()
+
+    otp_ref = db.collection("otp").document(email)
+    existing = otp_ref.get()
+
+    # Rate limit: 1 OTP per 60 seconds
+    if existing.exists:
+        existing_data = existing.to_dict()
+        last_sent = existing_data.get("lastSentAt")
+        if last_sent:
+            seconds = (datetime.utcnow() - last_sent).total_seconds()
+            if seconds < 60:
+                raise HTTPException(
+                    429,
+                    f"Please wait {int(60 - seconds)} seconds before requesting another code",
+                )
+
+    # Generate OTP
     otp = str(random.randint(100000, 999999))
 
-    db.collection("otp").document(email).set({
+    # Save OTP in Firestore
+    otp_ref.set({
         "otp": otp,
         "createdAt": datetime.utcnow(),
+        "lastSentAt": datetime.utcnow(),
     })
 
     try:
         html = otp_email_html(name, otp)
 
         resend.api_key = os.getenv("RESEND_API_KEY")
+
+        # Send OTP to the user's real email
         resend.Emails.send({
             "from": "SmartFoodSave <onboarding@resend.dev>",
-            "to": [os.getenv("RESEND_DEV_EMAIL")],
-            "subject": f"OTP for {email}: Your SmartFoodSave Verification Code",
+            "to": email,
+            "subject": "Your SmartFoodSave Verification Code",
             "html": html,
         })
+
     except Exception as e:
         print(f"❌ Failed to send OTP email: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to send email")
 
     return {"status": "sent"}
 
@@ -332,11 +373,24 @@ async def verify_otp(request: Request):
     name = data.get("name")
     otp = data.get("otp")
 
+    if not email or not otp:
+        raise HTTPException(400, "Missing fields")
+
     doc = db.collection("otp").document(email).get()
     if not doc.exists:
         raise HTTPException(400, "OTP not found")
 
-    if doc.to_dict()["otp"] != otp:
+    otp_data = doc.to_dict()
+    saved_otp = otp_data.get("otp")
+    created_at = otp_data.get("createdAt")
+
+    # Check expiration (10 minutes)
+    age_minutes = (datetime.utcnow() - created_at).total_seconds() / 60
+    if age_minutes > 10:
+        db.collection("otp").document(email).delete()
+        raise HTTPException(400, "OTP expired")
+
+    if saved_otp != otp:
         raise HTTPException(400, "Invalid OTP")
 
     # Create Firebase user
