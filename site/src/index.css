@@ -1,13 +1,95 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Source+Sans+Pro:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: 'Inter', sans-serif;
+  --font-body: 'Source Sans Pro', sans-serif;
+}
+
+/* SmartFoodSave brand theme tokens */
+@import './theme.css';
+
+/* Typography Base Styles */
+html {
+  font-family: 'Inter', sans-serif;
 }
 
 body {
-  font-family: var(--font-sans);
+  font-family: 'Source Sans Pro', sans-serif;
   margin: 0;
-  background-color: #f8fafc;
-  color: #0f172a;
+  background: var(--sf-bg);
+  color: var(--sf-text);
+  font-weight: 400;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* Heading Typography - Using Inter */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  color: var(--sf-text);
+}
+
+h1 { font-size: 2.25rem; font-weight: 800; }
+h2 { font-size: 1.875rem; font-weight: 700; }
+h3 { font-size: 1.5rem; font-weight: 600; }
+h4 { font-size: 1.25rem; font-weight: 600; }
+h5 { font-size: 1.125rem; font-weight: 600; }
+h6 { font-size: 1rem; font-weight: 600; }
+
+/* Link Styling */
+a {
+  color: var(--sf-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--sf-primary-deep);
+  text-decoration: underline;
+}
+
+/* Code Block Styling */
+code {
+  font-family: 'Fira Code', 'Courier New', monospace;
+  background: var(--sf-bg-secondary);
+  color: var(--sf-text);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+pre {
+  background: var(--sf-bg-secondary);
+  border: 1px solid var(--sf-border);
+  border-radius: 6px;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+/* Button Base Styles */
+button {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Form Elements */
+input, textarea, select {
+  background: var(--sf-surface);
+  color: var(--sf-text);
+  border: 1px solid var(--sf-border);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-family: 'Source Sans Pro', sans-serif;
+  transition: border-color 0.2s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--sf-primary);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+

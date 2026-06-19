@@ -88,6 +88,10 @@ export default function WeeklyPlanEditor({ school }) {
         borderRadius: 20,
         boxShadow: "0 8px 30px rgba(0,0,0,0.08)",
         animation: "fadeIn 0.6s ease-out",
+        darkMode: {
+          background: "#000000",
+          color: "#ddd",
+        },
       }}
     >
       <style>

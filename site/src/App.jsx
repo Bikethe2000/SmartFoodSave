@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { ThemeInitializer } from "./themeProvider";
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { api } from "./api";
 
@@ -63,18 +65,28 @@ export default function App() {
 
   return (
     <Router>
-      <Navbar isAuthenticated={isAuthenticated} />
+      <ThemeInitializer />
+      <div className="sf-bg sf-text min-h-screen">
+        <Navbar isAuthenticated={isAuthenticated} />
 
-      {/* Inline banner shown on protected routes when profile incomplete */}
-      {isAuthenticated && settingsLoaded && (!settings || !settings.schoolName) && ["/dashboard","/predictions","/data","/actions","/settings"].includes(clientPath) && (
-        <SchoolBanner initialSettings={settings || {}} onSaved={(s)=>setSettings({...settings, ...s})} />
-      )}
+        {/* Main content with margin to account for fixed navbar */}
+        <main className="pt-20">
+          {/* Inline banner shown on protected routes when profile incomplete */}
+          {isAuthenticated &&
+            settingsLoaded &&
+            (!settings || !settings.schoolName) &&
+            ["/dashboard", "/predictions", "/data", "/actions", "/settings"].includes(clientPath) && (
+              <SchoolBanner
+                initialSettings={settings || {}}
+                onSaved={(s) => setSettings({ ...settings, ...s })}
+              />
+            )}
 
-      <Routes>
-        {/* Public pages */}
-        <Route path="/" element={<Landing />} />
-        <Route path="/about" element={<AboutUs />} />
-        <Route path="http://localhost:5174/" element={<Documentation />} />
+          <Routes>
+          {/* Public pages */}
+          <Route path="/" element={<Landing />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="http://localhost:5174/" element={<Documentation />} />
 
         {/* Protected routes */}
         <Route
@@ -127,7 +139,10 @@ export default function App() {
       
         {/* Fallback */}
          <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+          </Routes>
+        </main>
+      </div>
     </Router>
+
   );
 }

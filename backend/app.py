@@ -30,23 +30,6 @@ load_dotenv()
 app = FastAPI()
 PORT = int(os.getenv("PORT", 5000))
 
-
-# ---------------------------
-# CORS (ΠΟΛΥ ΣΗΜΑΝΤΙΚΟ)
-# ---------------------------
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "https://food-waste-ai-bice.vercel.app",
-        "http://localhost:5173",  # for local dev
-        "https://foodwasteai-production.up.railway.app",
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
 db = None
 FIREBASE_API_KEY = os.getenv("FIREBASE_API_KEY")
 
@@ -192,6 +175,19 @@ def otp_email_html(name, otp):
 # ---------------------------
 # SETTINGS ENDPOINT
 # ---------------------------
+
+@app.options("/{rest_of_path:path}")
+async def preflight_handler(rest_of_path: str):
+    return JSONResponse(
+        content={},
+        headers={
+            "Access-Control-Allow-Origin": "https://food-waste-ai-bice.vercel.app",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Authorization, Content-Type, Accept",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Max-Age": "600",
+        }
+    )
 
 @app.get("/api/settings")
 async def get_settings(user=Depends(authenticate)):
@@ -792,89 +788,74 @@ def contact_email_html(name, email, message, phone=None):
     """
 
 
+def send_contact_emails(user_email, user_name, admin_body, user_body):
+    smtp_user = os.getenv("GMAIL_USER")      # your gmail: bikethe200.dev@gmail.com
+    smtp_pass = os.getenv("GMAIL_APP_PASS")  # Gmail App Password (not your real password)
+
+    def send(to, subject, body):
+        msg = MIMEMultipart()
+        msg["From"] = smtp_user
+        msg["To"] = to
+        msg["Subject"] = subject
+        msg.attach(MIMEText(body, "html"))
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(smtp_user, smtp_pass)
+            server.sendmail(smtp_user, to, msg.as_string())
+
+    # Email to you
+    send(smtp_user, "New Contact Form Submission", admin_body)
+    # Confirmation to user
+    send(user_email, "We received your message - SmartFoodSave", user_body)
+    
 @app.post("/api/contact")
 async def send_contact_form(request: Request):
     """Handle contact form submissions"""
     try:
         data = await request.json()
 
-        # Validate required fields
         name = data.get("name", "").strip()
         email = data.get("email", "").strip()
         message = data.get("message", "").strip()
         phone = data.get("phone", "").strip()
 
         if not name or not email or not message:
-            raise HTTPException(
-                status_code=400,
-                detail="Missing required fields: name, email, message",
-            )
+            raise HTTPException(status_code=400, detail="Missing required fields: name, email, message")
 
-        # Validate email format
         if "@" not in email:
             raise HTTPException(status_code=400, detail="Invalid email address")
 
-        # Get recipient email from environment
-        contact_recipient = os.getenv("CONTACT_FORM_RECIPIENT")
-        if not contact_recipient:
-            raise HTTPException(status_code=500, detail="Contact form not configured")
+        admin_body = contact_email_html(name, email, message, phone if phone else None)
 
-        # Send email to site admin
-        admin_subject = f"New Contact Form Submission from {name}"
-        admin_body = contact_email_html(
-            name, email, message, phone if phone else None
-        )
-        send_email(contact_recipient, admin_subject, admin_body, reply_to=email)
-
-        # Send confirmation email to user
-        user_subject = "We received your message - SmartFoodSave"
         user_body = f"""
         <html>
           <body style="font-family: Arial, sans-serif; background-color: #f6f9fc; padding: 40px;">
             <div style="max-width: 480px; margin: auto; background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-              
               <div style="text-align: center; margin-bottom: 24px;">
                 <div style="display: inline-block; padding: 12px; background: #d1fae5; border-radius: 12px;">
                   <img src="https://img.icons8.com/emoji/48/green-salad-emoji.png" width="40" height="40" />
                 </div>
-                <h2 style="color: #064e3b; margin-top: 16px; font-size: 24px; font-weight: 800;">
-                  Message Received
-                </h2>
+                <h2 style="color: #064e3b; margin-top: 16px; font-size: 24px; font-weight: 800;">Message Received</h2>
               </div>
-
-              <p style="color: #334155; font-size: 16px;">
-                Hello <strong>{name}</strong>,
-              </p>
-
+              <p style="color: #334155; font-size: 16px;">Hello <strong>{name}</strong>,</p>
               <p style="color: #475569; font-size: 15px; line-height: 1.6;">
                 Thank you for contacting SmartFoodSave! We have received your message and will get back to you as soon as possible.
               </p>
-
               <div style="background-color: #f0fdf4; padding: 16px; border-radius: 8px; border-left: 4px solid #059669; margin: 24px 0;">
                 <p style="color: #065f46; font-size: 14px; margin: 0;">
                   <strong>✓ Confirmation:</strong> Your message has been safely delivered.
                 </p>
               </div>
-
-              <p style="color: #475569; font-size: 14px; line-height: 1.6;">
-                Our team typically responds within 24-48 hours. In the meantime, feel free to explore our documentation or FAQ section.
-              </p>
-
               <hr style="margin: 32px 0; border: none; border-top: 1px solid #e2e8f0;" />
-
               <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-                SmartFoodSave © {datetime.utcnow().year}<br/>
-                AI‑powered food waste reduction for schools.
+                SmartFoodSave © {datetime.utcnow().year}<br/>AI‑powered food waste reduction for schools.
               </p>
-
             </div>
           </body>
         </html>
         """
-        try:
-            send_email(email, user_subject, user_body)
-        except Exception as e:
-            print(f"Warning: Could not send confirmation email to {email}: {e}")
+
+        send_contact_emails(email, name, admin_body, user_body)
 
         return {
             "success": True,
@@ -886,13 +867,9 @@ async def send_contact_form(request: Request):
         raise e
     except Exception as e:
         print(f"Error processing contact form: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error processing contact form: {str(e)}",
-        )
-
-
+        raise HTTPException(status_code=500, detail=f"Error processing contact form: {str(e)}")
 app.include_router(predict_router, prefix="/api/predict", tags=["predict"])
+
 
 
 # ---------------------------

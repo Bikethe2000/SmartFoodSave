@@ -1,24 +1,36 @@
+/* SmartFoodSave App Styles */
+
+/* Button Component Styles */
 .counter {
   font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
+  padding: 8px 16px;
+  border-radius: 6px;
+  color: white;
+  background: var(--sf-primary);
   border: 2px solid transparent;
-  transition: border-color 0.3s;
+  transition: all 0.2s ease;
   margin-bottom: 24px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
 
   &:hover {
-    border-color: var(--accent-border);
+    background: var(--sf-primary-deep);
+    border-color: var(--sf-primary);
+    box-shadow: var(--sf-shadow-glow);
   }
   &:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--sf-primary);
     outline-offset: 2px;
   }
 }
 
 .hero {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2xl);
+  margin: var(--space-3xl) 0;
 
   .base,
   .framework,
@@ -59,34 +71,36 @@
 #center {
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: var(--space-2xl);
   place-content: center;
   place-items: center;
   flex-grow: 1;
 
   @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
+    padding: var(--space-2xl) var(--space-lg) 1.5rem;
+    gap: 1.125rem;
   }
 }
 
 #next-steps {
   display: flex;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--sf-border);
   text-align: left;
+  background: var(--sf-card);
 
   & > div {
     flex: 1 1 0;
-    padding: 32px;
+    padding: var(--space-2xl);
     @media (max-width: 1024px) {
-      padding: 24px 20px;
+      padding: var(--space-xl) var(--space-lg);
     }
   }
 
   .icon {
-    margin-bottom: 16px;
+    margin-bottom: var(--space-lg);
     width: 22px;
     height: 22px;
+    color: var(--sf-primary);
   }
 
   @media (max-width: 1024px) {
@@ -96,11 +110,11 @@
 }
 
 #docs {
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--sf-border);
 
   @media (max-width: 1024px) {
     border-right: none;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--sf-border);
   }
 }
 
@@ -109,26 +123,34 @@
   padding: 0;
   display: flex;
   gap: 8px;
-  margin: 32px 0 0;
+  margin: var(--space-2xl) 0 0;
+  flex-wrap: wrap;
 
   .logo {
     height: 18px;
+    color: var(--sf-primary);
   }
 
   a {
-    color: var(--text-h);
+    color: var(--sf-text);
     font-size: 16px;
     border-radius: 6px;
-    background: var(--social-bg);
+    background: var(--sf-bg-secondary);
     display: flex;
-    padding: 6px 12px;
+    padding: var(--space-sm) var(--space-md);
     align-items: center;
-    gap: 8px;
+    gap: var(--space-sm);
     text-decoration: none;
-    transition: box-shadow 0.3s;
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    border: 1px solid var(--sf-border);
 
     &:hover {
-      box-shadow: var(--shadow);
+      background: var(--sf-card);
+      box-shadow: var(--sf-shadow-md);
+      color: var(--sf-primary);
+      border-color: var(--sf-primary);
     }
     .button-icon {
       height: 18px;
@@ -137,8 +159,7 @@
   }
 
   @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
+    margin-top: 1.25rem;
     justify-content: center;
 
     li {
@@ -155,7 +176,7 @@
 
 #spacer {
   height: 88px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--sf-border);
   @media (max-width: 1024px) {
     height: 48px;
   }
@@ -175,24 +196,32 @@
 
   &::before {
     left: 0;
-    border-left-color: var(--border);
+    border-left-color: var(--sf-border);
   }
   &::after {
     right: 0;
-    border-right-color: var(--border);
+    border-right-color: var(--sf-border);
   }
 }
 
 .nav-btn {
-  padding: 8px 16px;
-  border-radius: 12px;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: 8px;
   font-weight: 600;
   font-size: 14px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  color: #475569;
+  gap: var(--space-sm);
+  color: var(--sf-text-muted);
+  font-family: 'Inter', sans-serif;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
+
 .nav-btn:hover {
-  background: #f1f5f9;
+  background: var(--sf-bg-secondary);
+  color: var(--sf-primary);
+  border-color: var(--sf-border);
 }

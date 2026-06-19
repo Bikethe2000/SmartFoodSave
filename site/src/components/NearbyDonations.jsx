@@ -94,8 +94,8 @@ export default function NearbyDonations() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
-        <div className="flex items-center gap-3 text-slate-400">
+      <div className="sf-bg rounded-3xl p-8 shadow-sm" style={{ border: '1px solid var(--sf-border)' }}>
+        <div className="flex items-center gap-3 sf-text-muted">
           <Loader className="h-5 w-5 animate-spin" />
           <span className="text-sm font-medium">Loading donation points...</span>
         </div>
@@ -105,12 +105,12 @@ export default function NearbyDonations() {
 
   if (error) {
     return (
-      <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
+      <div className="sf-bg rounded-3xl p-8 shadow-sm" style={{ border: '1px solid var(--sf-border)' }}>
         <div className="flex items-start gap-4">
           <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-semibold text-slate-800 mb-1">No Donations Available</h3>
-            <p className="text-sm text-slate-600">{error}</p>
+            <h3 className="font-semibold sf-text mb-1">No Donations Available</h3>
+            <p className="text-sm sf-text-muted">{error}</p>
           </div>
         </div>
       </div>
@@ -118,12 +118,12 @@ export default function NearbyDonations() {
   }
 
   return (
-    <div className="space-y-4 animate-fade-in">
+    <div className="space-y-4 animate-fade-in sf-text">
       <div className="flex items-center gap-2">
-        <MapPin className="h-5 w-5 text-emerald-600" />
-        <h2 className="text-lg font-bold text-slate-800">Nearby Donation Points</h2>
+        <MapPin className="h-5 w-5" style={{ color: 'var(--sf-primary)' }} />
+        <h2 className="text-lg font-bold sf-text">Nearby Donation Points</h2>
         {city && (
-          <span className="ml-auto text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+          <span className="ml-auto text-xs font-medium sf-text-muted" style={{ background: 'var(--sf-bg-secondary)', border: '1px solid var(--sf-border)' }} className="px-3 py-1 rounded-full">
             {city}
           </span>
         )}
@@ -136,13 +136,13 @@ export default function NearbyDonations() {
           return (
             <div
               key={idx}
-              className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow space-y-4"
+              className="sf-bg rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow space-y-4" style={{ border: '1px solid var(--sf-border)' }}
             >
               {/* Header */}
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-800">{point.name}</h3>
-                  <p className="text-xs font-medium text-emerald-600 mt-1">{point.type}</p>
+                  <h3 className="text-lg font-bold sf-text">{point.name}</h3>
+                  <p className="text-xs font-medium" style={{ color: 'var(--sf-primary)' }} className="mt-1">{point.type}</p>
                 </div>
 
                 {point.rating && (
@@ -154,7 +154,7 @@ export default function NearbyDonations() {
               </div>
 
               {/* Mini Map Preview */}
-              <div className="rounded-xl overflow-hidden border border-slate-200">
+              <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--sf-border)' }}>
                 <iframe
                   title={`Map of ${point.name}`}
                   width="100%"
@@ -168,21 +168,21 @@ export default function NearbyDonations() {
               </div>
 
               {/* Details */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2" style={{ borderTop: '1px solid var(--sf-border)' }}>
                 <div className="flex gap-3">
-                  <MapPin className="h-5 w-5 text-slate-400 flex-shrink-0" />
+                  <MapPin className="h-5 w-5 sf-text-muted flex-shrink-0" />
                   <div className="text-sm">
-                    <p className="text-slate-700 font-medium">{point.address}</p>
+                    <p className="sf-text font-medium">{point.address}</p>
                     {point.distance && (
-                      <p className="text-xs text-slate-500 mt-1">📍 {point.distance} away</p>
+                      <p className="text-xs sf-text-muted mt-1">📍 {point.distance} away</p>
                     )}
                   </div>
                 </div>
 
                 {point.phone && (
                   <div className="flex gap-3">
-                    <Phone className="h-5 w-5 text-slate-400 flex-shrink-0" />
-                    <a href={`tel:${point.phone}`} className="text-emerald-600 font-medium">
+                    <Phone className="h-5 w-5 sf-text-muted flex-shrink-0" />
+                    <a href={`tel:${point.phone}`} className="font-medium" style={{ color: 'var(--sf-primary)' }}>
                       {point.phone}
                     </a>
                   </div>
@@ -190,19 +190,20 @@ export default function NearbyDonations() {
 
                 {point.hours && (
                   <div className="flex gap-3">
-                    <Clock className="h-5 w-5 text-slate-400 flex-shrink-0" />
-                    <p className="text-sm text-slate-700">{point.hours}</p>
+                    <Clock className="h-5 w-5 sf-text-muted flex-shrink-0" />
+                    <p className="text-sm sf-text">{point.hours}</p>
                   </div>
                 )}
 
                 {point.website && (
                   <div className="flex gap-3">
-                    <Globe className="h-5 w-5 text-slate-400 flex-shrink-0" />
+                    <Globe className="h-5 w-5 sf-text-muted flex-shrink-0" />
                     <a
                       href={point.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-indigo-600 font-medium"
+                      className="font-medium"
+                      style={{ color: 'var(--sf-primary)' }}
                     >
                       Visit Website
                     </a>
@@ -215,7 +216,8 @@ export default function NearbyDonations() {
                 {point.phone && (
                   <a
                     href={`tel:${point.phone}`}
-                    className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl text-center"
+                    className="flex-1 px-4 py-2 text-white text-sm font-bold rounded-xl text-center transition"
+                    style={{ background: 'var(--sf-primary)' }}
                   >
                     Contact
                   </a>
@@ -225,7 +227,7 @@ export default function NearbyDonations() {
                   href={directionsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-xl text-center"
+                  className="flex-1 px-4 py-2 text-sm font-bold rounded-xl text-center transition sf-text" style={{ background: 'var(--sf-bg-secondary)', border: '1px solid var(--sf-border)' }}
                 >
                   Open in Google Maps
                 </a>
@@ -234,7 +236,8 @@ export default function NearbyDonations() {
                   href={directionsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl text-center"
+                  className="flex-1 px-4 py-2 text-white text-sm font-bold rounded-xl text-center transition"
+                  style={{ background: 'var(--sf-primary)' }}
                 >
                   Start Navigation
                 </a>

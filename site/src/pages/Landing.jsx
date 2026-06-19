@@ -1,96 +1,126 @@
 import { Link } from "react-router-dom";
-import { Utensils, LineChart, Sparkles, ClipboardList } from "lucide-react";
+import { Utensils, LineChart, Sparkles, ClipboardList, Award } from "lucide-react";
 
 export default function Landing() {
   return (
-    <div className="w-full">
-      {/* HERO SECTION */}
-      <section className="pt-24 pb-32 bg-linear-to-b from-emerald-50 to-white">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <div className="flex justify-center mb-6">
-            <div className="p-4 bg-emerald-100 rounded-2xl text-emerald-700 shadow-sm">
-              <Utensils className="h-10 w-10" />
+    <div className="min-h-screen sf-bg sf-text">
+      <div className="w-full">
+        {/* HERO SECTION */}
+        <section className="pt-16 pb-32" style={{ background: 'linear-gradient(to bottom, rgba(5, 150, 105, 0.05), var(--sf-bg))' }}>
+          <div className="max-w-6xl mx-auto px-6 text-center">
+            {/* Hackathon Badge */}
+            <div className="flex justify-center mb-6">
+              <div className="flex items-center gap-3 px-6 py-3 rounded-full shadow-sm" style={{ background: 'rgba(5, 150, 105, 0.1)', color: 'var(--sf-primary)' }}>
+                <Award className="h-6 w-6" style={{ color: 'var(--sf-primary)' }} />
+                <span className="font-semibold">
+                  Built for USAII Global AI Hackathon 2026
+                </span>
+              </div>
+            </div>
+
+            {/* Icon */}
+            <div className="flex justify-center mb-6">
+              <div className="p-4 rounded-2xl shadow-sm" style={{ background: 'rgba(5, 150, 105, 0.1)', color: 'var(--sf-primary)' }}>
+                <Utensils className="h-10 w-10" style={{ color: 'var(--sf-primary)' }} />
+              </div>
+            </div>
+
+            {/* Title */}
+            <h1 className="text-5xl font-extrabold leading-tight mb-6 sf-text">
+              Make Your Cafeteria Smarter with{" "}
+              <span style={{ color: 'var(--sf-primary)' }}>AI‑Powered Food Waste Insights</span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-lg max-w-3xl mx-auto mb-10 sf-text-muted">
+              SmartFoodSave helps schools predict food waste, optimize portions, and take meaningful action.
+              Built for real cafeteria staff — simple, practical, and powered by machine learning.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex justify-center gap-4 flex-wrap">
+              <Link
+                to="/dashboard"
+                className="px-8 py-4 text-white rounded-xl text-lg font-bold shadow-md transition hover:opacity-90"
+                style={{ background: 'var(--sf-primary)', color: 'white' }}
+              >
+                Enter Dashboard
+              </Link>
+
+              <Link
+                to="/signup"
+                className="px-8 py-4 rounded-xl text-lg font-bold shadow-sm transition"
+                style={{ 
+                  background: 'var(--sf-card)',
+                  border: '1px solid var(--sf-border)',
+                  color: 'var(--sf-text)'
+                }}
+              >
+                Create Account
+              </Link>
             </div>
           </div>
+        </section>
 
-          <h1 className="text-5xl font-extrabold text-slate-800 leading-tight mb-6">
-            Reduce Food Waste with <span className="text-emerald-600">AI‑Powered Insights</span>
-          </h1>
+        {/* FEATURES SECTION */}
+        <section className="py-24 sf-bg">
+          <div className="max-w-6xl mx-auto px-6">
+            <h2 className="text-3xl font-bold sf-text text-center mb-16">
+              How SmartFoodSave Supports Your Cafeteria
+            </h2>
 
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-10">
-            SmartFoodSave helps school cafeterias predict waste, optimize portions, 
-            and take meaningful action using real‑time data and machine learning.
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+              {/* Feature 1 */}
+              <div className="p-8 rounded-2xl shadow-sm text-center hover:shadow-md transition" style={{ background: 'var(--sf-bg-secondary)' }}>
+                <LineChart className="h-10 w-10 mx-auto mb-4" style={{ color: 'var(--sf-primary)' }} />
+                <h3 className="text-xl font-bold sf-text mb-2">AI Predictions</h3>
+                <p className="sf-text-muted">
+                  Forecast daily food waste and portion needs using machine learning trained on your cafeteria’s
+                  patterns.
+                </p>
+              </div>
+
+              {/* Feature 2 */}
+              <div className="p-8 rounded-2xl shadow-sm text-center hover:shadow-md transition" style={{ background: 'var(--sf-bg-secondary)' }}>
+                <Sparkles className="h-10 w-10 mx-auto mb-4" style={{ color: 'var(--sf-primary)' }} />
+                <h3 className="text-xl font-bold sf-text mb-2">Smart Recommendations</h3>
+                <p className="sf-text-muted">
+                  Get clear, actionable suggestions to reduce waste — from portion adjustments to menu insights.
+                </p>
+              </div>
+
+              {/* Feature 3 */}
+              <div className="p-8 rounded-2xl shadow-sm text-center hover:shadow-md transition" style={{ background: 'var(--sf-bg-secondary)' }}>
+                <ClipboardList className="h-10 w-10 mx-auto mb-4" style={{ color: 'var(--sf-primary)' }} />
+                <h3 className="text-xl font-bold sf-text mb-2">Daily Logging</h3>
+                <p className="sf-text-muted">
+                  Easily track prepared, served, and leftover portions to build accurate historical data.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA SECTION */}
+        <section className="py-24 text-white text-center" style={{ background: 'var(--sf-primary)' }}>
+          <h2 className="text-4xl font-extrabold mb-6">Start Reducing Waste Today</h2>
+          <p className="text-lg max-w-2xl mx-auto mb-10" style={{ opacity: 0.9 }}>
+            Join schools taking real climate action through simple, everyday decisions powered by AI.
           </p>
 
-          <div className="flex justify-center gap-4">
-            <Link
-              to="/dashboard"
-              className="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-lg font-bold shadow-md transition"
-            >
-              Enter Dashboard
-            </Link>
-
-            <Link
-              to="/signup"
-              className="px-8 py-4 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl text-lg font-bold shadow-sm transition"
-            >
-              Create Account
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* FEATURES SECTION */}
-      <section className="py-24 bg-white">
-        <div className="max-w-6xl mx-auto px-6">
-          <h2 className="text-3xl font-bold text-slate-800 text-center mb-16">
-            How SmartFoodSave Helps Your Cafeteria
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="p-8 bg-slate-50 rounded-2xl shadow-sm text-center">
-              <LineChart className="h-10 w-10 text-emerald-600 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-slate-800 mb-2">AI Predictions</h3>
-              <p className="text-slate-600">
-                Forecast daily food waste and portion needs using machine learning.
-              </p>
-            </div>
-
-            <div className="p-8 bg-slate-50 rounded-2xl shadow-sm text-center">
-              <Sparkles className="h-10 w-10 text-emerald-600 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-slate-800 mb-2">Smart Actions</h3>
-              <p className="text-slate-600">
-                Receive actionable recommendations to reduce waste and improve efficiency.
-              </p>
-            </div>
-
-            <div className="p-8 bg-slate-50 rounded-2xl shadow-sm text-center">
-              <ClipboardList className="h-10 w-10 text-emerald-600 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-slate-800 mb-2">Daily Logs</h3>
-              <p className="text-slate-600">
-                Track prepared, served, and leftover portions with ease.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA SECTION */}
-      <section className="py-24 bg-emerald-600 text-white text-center">
-        <h2 className="text-4xl font-extrabold mb-6">
-          Ready to Make Your Cafeteria Smarter?
-        </h2>
-        <p className="text-lg max-w-2xl mx-auto mb-10 opacity-90">
-          Join schools reducing waste and improving sustainability with AI‑powered tools.
-        </p>
-
-        <Link
-          to="/signup"
-          className="px-10 py-4 bg-white text-emerald-700 rounded-xl text-lg font-bold shadow-lg hover:bg-slate-100 transition"
-        >
-          Get Started Today
-        </Link>
-      </section>
+          <Link
+            to="/signup"
+            className="px-10 py-4 rounded-xl text-lg font-bold shadow-lg hover:opacity-90 transition"
+            style={{ 
+              background: 'white',
+              color: 'var(--sf-primary)'
+            }}
+          >
+            Get Started
+          </Link>
+        </section>
+      </div>
     </div>
   );
 }
+

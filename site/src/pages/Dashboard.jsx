@@ -189,8 +189,8 @@ export default function Dashboard() {
     return "text-red-600";
   };
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-fade-in mb-10">
-      <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
+    <div className="max-w-5xl mx-auto space-y-8 animate-fade-in mb-10 sf-text">
+      <h1 className="text-2xl font-bold sf-text">Dashboard</h1>
 
       <NearbyDonations />
 
@@ -218,8 +218,8 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-        <h2 className="text-lg font-bold text-slate-700 mb-4">
+      <div className="sf-bg p-6 rounded-3xl shadow-sm" style={{ border: '1px solid var(--sf-border)' }}>
+        <h2 className="text-lg font-bold sf-text mb-4">
           Waste Trend (Last 14 Days)
         </h2>
 
@@ -239,8 +239,8 @@ export default function Dashboard() {
         </ResponsiveContainer>
       </div>
 
-      <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-        <h2 className="text-lg font-bold text-slate-700 mb-4">
+      <div className="sf-bg p-6 rounded-3xl shadow-sm" style={{ border: '1px solid var(--sf-border)' }}>
+        <h2 className="text-lg font-bold sf-text mb-4">
           Meal Performance (Avg Waste)
         </h2>
 
@@ -255,7 +255,7 @@ export default function Dashboard() {
         </ResponsiveContainer>
       </div>
 
-      <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl text-emerald-800 text-sm font-semibold">
+      <div className="p-5 rounded-2xl text-sm font-semibold" style={{ background: 'rgba(5, 150, 105, 0.1)', color: 'var(--sf-primary)' }}>
         {insight}
       </div>
 
@@ -269,33 +269,35 @@ export default function Dashboard() {
       </button>
 
       {weeklyPrediction && (
-        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
-          <h2 className="text-lg font-bold text-slate-700">Weekly Schedule Comparison</h2>
+        <div className="sf-bg p-6 rounded-3xl shadow-sm" style={{ border: '1px solid var(--sf-border)' }}>
+          <h2 className="text-lg font-bold sf-text">Weekly Schedule Comparison</h2>
 
           {Object.entries(weeklyPrediction).map(([day, result]) => (
-            <div key={day} className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-              <div className="font-bold text-slate-800 mb-2">{day}</div>
+            <div key={day} className="p-4 rounded-xl" style={{ background: 'var(--sf-bg-secondary)', border: '1px solid var(--sf-border)' }}>
+              <div className="font-bold sf-text mb-2">{day}</div>
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <div className="text-slate-500">Default Meal</div>
-                  <div className="font-semibold">{defaultSchedule[day] || "—"}</div>
+                  <div className="sf-text-muted">Default Meal</div>
+                  <div className="font-semibold sf-text">{defaultSchedule[day] || "—"}</div>
                 </div>
 
                 <div>
-                  <div className="text-slate-500">Suggested Meal</div>
-                  <div className="font-semibold text-indigo-600">
+                  <div className="sf-text-muted">Suggested Meal</div>
+                  <div className="font-semibold" style={{ color: 'var(--sf-primary)' }}>
                     {result.menuItemUsed}
                   </div>
                 </div>
               </div>
 
-              <div className="mt-2 text-xs text-slate-600">
-                Waste: <strong>{result.predictedWastePortions}</strong> portions  
+              <div className="mt-2 text-xs sf-text-muted">
+                Waste: <strong>
+                  <span className="sf-text">{result.predictedWastePortions}</span>
+                </strong> portions  
                 <br />
-                Risk: <strong>{result.riskLevel}</strong>
+                Risk: <strong><span className="sf-text">{result.riskLevel}</span></strong>
                 <br />
-                <span className="text-slate-500">{result.explanation}</span>
+                <span>{result.explanation}</span>
               </div>
             </div>
           ))}
@@ -307,12 +309,12 @@ export default function Dashboard() {
 
 function SummaryCard({ title, value, icon, color }) {
   return (
-    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-1">
-      <div className="flex items-center gap-2 text-slate-600 text-xs font-bold uppercase">
+    <div className="sf-bg p-4 rounded-2xl shadow-sm flex flex-col gap-1" style={{ border: '1px solid var(--sf-border)' }}>
+      <div className="flex items-center gap-2 sf-text-muted text-xs font-bold uppercase">
         {icon}
         {title}
       </div>
-      <div className={`text-xl font-bold ${color || "text-slate-800"}`}>
+      <div className={`text-xl font-bold ${color || "sf-text"}`}>
         {value}
       </div>
     </div>

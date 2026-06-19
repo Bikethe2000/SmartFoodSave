@@ -64,24 +64,25 @@ export default function Predictions() {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-6 space-y-4">
-      <h1 className="text-2xl font-bold text-slate-800">Food Waste Prediction</h1>
+    <div className="max-w-xl mx-auto p-6 space-y-4 sf-text">
+      <h1 className="text-2xl font-bold sf-text">Food Waste Prediction</h1>
 
       <div className="space-y-3">
         <div>
-          <label className="text-xs font-bold text-slate-500 uppercase">Date</label>
+          <label className="text-xs font-bold sf-text-muted uppercase">Date</label>
           <input
             type="date"
             name="date"
             value={form.date}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm"
+            className="w-full px-3 py-2 rounded-xl text-sm sf-text"
+            style={{ border: '1px solid var(--sf-border)', background: 'var(--sf-card)', color: 'var(--sf-text)' }}
           />
         </div>
 
         <div>
-          <label className="text-xs font-bold text-slate-500 uppercase">
-            Menu Item <span className="text-slate-400">(optional if schedule set)</span>
+          <label className="text-xs font-bold sf-text-muted uppercase">
+            Menu Item <span className="sf-text-muted">(optional if schedule set)</span>
           </label>
           <input
             type="text"
@@ -89,13 +90,14 @@ export default function Predictions() {
             placeholder="Pasta"
             value={form.menu_item}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm"
+            className="w-full px-3 py-2 rounded-xl text-sm sf-text"
+            style={{ border: '1px solid var(--sf-border)', background: 'var(--sf-card)', color: 'var(--sf-text)' }}
           />
         </div>
 
         <div>
-          <label className="text-xs font-bold text-slate-500 uppercase">
-            Preferred foods <span className="text-slate-400">(optional)</span>
+          <label className="text-xs font-bold sf-text-muted uppercase">
+            Preferred foods <span className="sf-text-muted">(optional)</span>
           </label>
           <input
             type="text"
@@ -103,31 +105,34 @@ export default function Predictions() {
             placeholder="e.g. chicken, vegetarian"
             value={form.preferred_foods}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm"
+            className="w-full px-3 py-2 rounded-xl text-sm sf-text"
+            style={{ border: '1px solid var(--sf-border)', background: 'var(--sf-card)', color: 'var(--sf-text)' }}
           />
         </div>
 
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase">Prepared Portions</label>
+            <label className="text-xs font-bold sf-text-muted uppercase">Prepared Portions</label>
             <input
               type="number"
               name="prepared_portions"
               value={form.prepared_portions}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm"
+              className="w-full px-3 py-2 rounded-xl text-sm sf-text"
+              style={{ border: '1px solid var(--sf-border)', background: 'var(--sf-card)', color: 'var(--sf-text)' }}
             />
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase">Attendance</label>
+            <label className="text-xs font-bold sf-text-muted uppercase">Attendance</label>
             <input
               type="number"
               name="attendance"
               value={form.attendance}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm"
+              className="w-full px-3 py-2 rounded-xl text-sm sf-text"
+              style={{ border: '1px solid var(--sf-border)', background: 'var(--sf-card)', color: 'var(--sf-text)' }}
             />
           </div>
         </div>
@@ -136,13 +141,14 @@ export default function Predictions() {
       <button
         onClick={handlePredict}
         disabled={loading}
-        className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold"
+        className="w-full py-3 text-white rounded-xl text-sm font-bold transition"
+        style={{ background: 'var(--sf-primary)', opacity: loading ? 0.6 : 1 }}
       >
         {loading ? "Predicting..." : "Predict"}
       </button>
 
       {result && (
-        <div className="mt-4 p-4 border border-slate-200 rounded-2xl bg-slate-50 space-y-1 text-sm">
+        <div className="mt-4 p-4 rounded-2xl space-y-1 text-sm sf-text" style={{ background: 'var(--sf-bg-secondary)', border: '1px solid var(--sf-border)' }}>
           <div><span className="font-bold">Menu item used:</span> {result.menuItemUsed}</div>
           <div><span className="font-bold">Predicted waste:</span> {result.predictedWastePortions} portions</div>
           <div><span className="font-bold">Risk level:</span> {result.riskLevel}</div>

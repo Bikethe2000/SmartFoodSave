@@ -1,0 +1,127 @@
+/* SmartFoodSave Brand Theme - Complete Design System */
+
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;500;600;700&display=swap');
+
+/* Light Mode - Default */
+:root {
+  /* Primary Colors */
+  --sf-primary: #059669;
+  --sf-primary-deep: #047857;
+  
+  /* Neutrals */
+  --sf-slate: #1E293B;
+  --sf-cool-gray: #64748B;
+  --sf-soft-gray: #F8FAFC;
+  --sf-warm-sand: #F5F5F4;
+  
+  /* Accents */
+  --sf-sage: #A7F3D0;
+  --sf-warm-sand-accent: #F5F5F4;
+  
+  /* Alerts */
+  --sf-alert-red: #EF4444;
+  --sf-alert-amber: #F59E0B;
+  --sf-alert-green: #10B981;
+  
+  /* Backgrounds & Surfaces */
+  --sf-bg: #ffffff;
+  --sf-bg-secondary: #F8FAFC;
+  --sf-card: #ffffff;
+  --sf-border: rgba(30, 41, 59, 0.12);
+  
+  /* Text */
+  --sf-text: #0F172A;
+  --sf-text-muted: #64748B;
+  --sf-text-secondary: #475569;
+  
+  /* Effects */
+  --sf-shadow-glow: 0 0 20px rgba(5, 150, 105, 0.15);
+  --sf-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --sf-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Mode */
+html[data-theme='dark'] {
+  /* Primary Colors - Adjusted for dark mode */
+  --sf-primary: #10B981;
+  --sf-primary-deep: #059669;
+  
+  /* Neutrals - Dark mode versions */
+  --sf-slate: #E2E8F0;
+  --sf-cool-gray: #94A3B8;
+  --sf-soft-gray: #1E293B;
+  --sf-warm-sand: #3F3F46;
+  
+  /* Accents */
+  --sf-sage: #34D399;
+  --sf-warm-sand-accent: #3F3F46;
+  
+  /* Alerts */
+  --sf-alert-red: #F87171;
+  --sf-alert-amber: #FBBF24;
+  --sf-alert-green: #4ADE80;
+  
+  /* Backgrounds & Surfaces */
+  --sf-bg: #0F172A;
+  --sf-bg-secondary: #1E293B;
+  --sf-card: #273449;
+  --sf-border: rgba(226, 232, 240, 0.12);
+  
+  /* Text */
+  --sf-text: #FFFFFF;
+  --sf-text-muted: #94A3B8;
+  --sf-text-secondary: #CBD5E1;
+  
+  /* Effects */
+  --sf-shadow-glow: 0 0 20px rgba(16, 185, 129, 0.18);
+  --sf-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --sf-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+}
+
+/* Typography System */
+:root {
+  --font-sans: 'Inter', sans-serif;
+  --font-body: 'Source Sans Pro', sans-serif;
+  
+  /* Font Weights */
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-extrabold: 800;
+  
+  /* Spacing System (4px grid) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 48px;
+}
+
+/* Utility Classes */
+.sf-bg { background: var(--sf-bg) !important; }
+.sf-bg-secondary { background: var(--sf-bg-secondary) !important; }
+.sf-text { color: var(--sf-text) !important; }
+.sf-text-muted { color: var(--sf-text-muted) !important; }
+.sf-text-secondary { color: var(--sf-text-secondary) !important; }
+.sf-card { background: var(--sf-card) !important; }
+.sf-border { border-color: var(--sf-border) !important; }
+
+.sf-primary { color: var(--sf-primary) !important; }
+.sf-primary-bg { background: var(--sf-primary) !important; }
+.sf-primary-deep { color: var(--sf-primary-deep) !important; }
+.sf-primary-deep-bg { background: var(--sf-primary-deep) !important; }
+
+.sf-sage { color: var(--sf-sage) !important; }
+.sf-sage-bg { background: var(--sf-sage) !important; }
+
+.sf-alert-red { color: var(--sf-alert-red) !important; }
+.sf-alert-amber { color: var(--sf-alert-amber) !important; }
+.sf-alert-green { color: var(--sf-alert-green) !important; }
+
+.sf-shadow-glow { box-shadow: var(--sf-shadow-glow) !important; }
+.sf-shadow-sm { box-shadow: var(--sf-shadow-sm) !important; }
+.sf-shadow-md { box-shadow: var(--sf-shadow-md) !important; }
+

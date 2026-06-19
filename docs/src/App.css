@@ -1,8 +1,11 @@
-/* Documentation App Styles */
+/* SmartFoodSave Documentation App Styles */
 
+/* Sidebar Navigation */
 .sidebar-nav {
   scrollbar-width: thin;
-  scrollbar-color: rgba(100, 116, 139, 0.3) transparent;
+  scrollbar-color: var(--sf-cool-gray) transparent;
+  background: var(--sf-card);
+  border-right: 1px solid var(--sf-border);
 }
 
 .sidebar-nav::-webkit-scrollbar {
@@ -14,33 +17,131 @@
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.3);
+  background: var(--sf-cool-gray);
+  opacity: 0.3;
   border-radius: 3px;
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.5);
+  background: var(--sf-cool-gray);
+  opacity: 0.5;
 }
 
-/* Smooth transitions */
+/* Navigation Button Styles */
 .nav-button {
   transition: all 0.2s ease-in-out;
+  color: var(--sf-text);
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
 }
 
 .nav-button:hover {
+  background: var(--sf-bg-secondary);
+  color: var(--sf-primary);
   transform: translateX(4px);
 }
 
-/* Code block styling */
-code {
-  font-family: 'Fira Code', 'Courier New', monospace;
+.nav-button.active {
+  background: rgba(5, 150, 105, 0.1);
+  color: var(--sf-primary);
+  font-weight: 600;
 }
 
-/* Link styling */
+/* Code Block Styling */
+code {
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 0.875rem;
+  background: var(--sf-bg-secondary);
+  color: var(--sf-text);
+}
+
+pre code {
+  background: transparent;
+}
+
+/* Link Styling */
 a {
   position: relative;
+  color: var(--sf-primary);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
 }
 
 a:hover {
-  text-decoration: underline;
+  border-bottom-color: var(--sf-primary);
+  text-decoration: none;
+}
+
+/* Documentation Specific Components */
+.doc-section {
+  padding: 2rem;
+  margin-bottom: 2rem;
+  background: var(--sf-card);
+  border-radius: 8px;
+  border: 1px solid var(--sf-border);
+}
+
+.doc-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--sf-text);
+  margin-bottom: 1rem;
+}
+
+.doc-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: var(--sf-primary);
+  margin: 1.5rem 0 0.75rem 0;
+}
+
+/* Table of Contents Styling */
+.toc-link {
+  display: block;
+  padding: 0.5rem 0;
+  color: var(--sf-text-muted);
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.toc-link:hover {
+  color: var(--sf-primary);
+  padding-left: 0.25rem;
+}
+
+.toc-link.active {
+  color: var(--sf-primary);
+  font-weight: 600;
+}
+
+/* Alert/Info Boxes */
+.doc-alert {
+  padding: 1rem;
+  border-radius: 6px;
+  border-left: 4px solid var(--sf-primary);
+  background: rgba(5, 150, 105, 0.05);
+  margin: 1rem 0;
+}
+
+.doc-alert.info {
+  border-left-color: #3B82F6;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.doc-alert.warning {
+  border-left-color: var(--sf-alert-amber);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.doc-alert.error {
+  border-left-color: var(--sf-alert-red);
+  background: rgba(239, 68, 68, 0.05);
 }

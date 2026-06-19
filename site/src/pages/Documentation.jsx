@@ -4,7 +4,7 @@ export default function Documentation() {
   return (
     <div className="w-full pt-24">
       {/* HERO SECTION */}
-      <section className="pb-16 bg-gradient-to-b from-blue-50 to-white">
+      <section className="pb-16 bg-gradient-to-b from-emerald-50 to-white dark:from-slate-800 dark:to-slate-900">
         <div className="max-w-6xl mx-auto px-6 text-center">
           <h1 className="text-5xl font-extrabold text-slate-800 leading-tight mb-6">
             <span className="text-blue-600">Documentation</span> & Help
@@ -20,7 +20,7 @@ export default function Documentation() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Getting Started */}
-            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-8 shadow-sm border border-emerald-200 cursor-pointer hover:shadow-md transition">
+            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/30 dark:to-slate-800 rounded-lg p-8 shadow-sm border border-emerald-200 dark:border-emerald-700/40 cursor-pointer hover:shadow-md transition">
               <BookOpen className="h-8 w-8 text-emerald-600 mb-4" />
               <h3 className="text-2xl font-bold text-slate-800 mb-3">Getting Started</h3>
               <p className="text-slate-700 mb-4">
