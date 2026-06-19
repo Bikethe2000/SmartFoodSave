@@ -175,20 +175,6 @@ def otp_email_html(name, otp):
 # ---------------------------
 # SETTINGS ENDPOINT
 # ---------------------------
-
-@app.options("/{rest_of_path:path}")
-async def preflight_handler(rest_of_path: str):
-    return JSONResponse(
-        content={},
-        headers={
-            "Access-Control-Allow-Origin": "https://food-waste-ai-bice.vercel.app",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "Authorization, Content-Type, Accept",
-            "Access-Control-Allow-Credentials": "true",
-            "Access-Control-Max-Age": "600",
-        }
-    )
-
 @app.get("/api/settings")
 async def get_settings(user=Depends(authenticate)):
     """Load user settings from Firestore"""

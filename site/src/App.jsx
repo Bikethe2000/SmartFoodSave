@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ThemeInitializer } from "./themeProvider";
+
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { api } from "./api";
@@ -65,8 +65,9 @@ export default function App() {
 
   return (
     <Router>
-      <ThemeInitializer />
+
       <div className="sf-bg sf-text min-h-screen">
+
         <Navbar isAuthenticated={isAuthenticated} />
 
         {/* Inline banner shown on protected routes when profile incomplete */}

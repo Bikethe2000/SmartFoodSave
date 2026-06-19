@@ -9,7 +9,7 @@ import FAQ from './pages/FAQ';
 import ContactForm from './components/ContactForm';
 
 import { BookOpen, Zap, Cog, Code, HelpCircle, Mail, Menu, X } from 'lucide-react';
-import ThemeToggleButton from './themeToggle';
+
 
 export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -27,19 +27,22 @@ export default function App() {
     <div className="min-h-screen sf-bg sf-text">
 
       {/* NAVBAR */}
-      <header className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 shadow-sm">
+      <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
 
           {/* Left */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"
+              className="lg:hidden p-2 hover:bg-slate-100 rounded-lg transition"
+
             >
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
 
-            <Link to="/" className="text-2xl font-bold flex items-center gap-2 text-slate-800 dark:text-white">
+            <Link to="/" className="text-2xl font-bold flex items-center gap-2 text-slate-800">
+
               🍽️ Food Waste AI Docs
             </Link>
           </div>
@@ -51,7 +54,8 @@ export default function App() {
                 <Link
                   key={item.id}
                   to={item.path}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg transition font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg transition font-medium text-slate-700 hover:bg-slate-100"
+
                 >
                   {item.label}
                 </Link>
@@ -67,13 +71,14 @@ export default function App() {
             >
               Contact Us
             </Link>
-            <ThemeToggleButton />
+
           </div>
         </div>
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
+          <div className="lg:hidden border-t border-slate-200 bg-white p-4">
+
             <nav className="flex flex-col gap-2">
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -82,7 +87,8 @@ export default function App() {
                     key={item.id}
                     to={item.path}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium text-slate-700 hover:bg-slate-100"
+
                   >
                     <Icon size={20} />
                     {item.label}

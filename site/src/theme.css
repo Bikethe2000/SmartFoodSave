@@ -40,43 +40,7 @@
   --sf-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* Dark Mode */
-html[data-theme='dark'] {
-  /* Primary Colors - Adjusted for dark mode */
-  --sf-primary: #10B981;
-  --sf-primary-deep: #059669;
-  
-  /* Neutrals - Dark mode versions */
-  --sf-slate: #E2E8F0;
-  --sf-cool-gray: #94A3B8;
-  --sf-soft-gray: #1E293B;
-  --sf-warm-sand: #3F3F46;
-  
-  /* Accents */
-  --sf-sage: #34D399;
-  --sf-warm-sand-accent: #3F3F46;
-  
-  /* Alerts */
-  --sf-alert-red: #F87171;
-  --sf-alert-amber: #FBBF24;
-  --sf-alert-green: #4ADE80;
-  
-  /* Backgrounds & Surfaces */
-  --sf-bg: #0F172A;
-  --sf-bg-secondary: #1E293B;
-  --sf-surface: #273449;
-  --sf-border: rgba(226, 232, 240, 0.12);
-  
-  /* Text */
-  --sf-text: #FFFFFF;
-  --sf-text-muted: #94A3B8;
-  --sf-text-secondary: #CBD5E1;
-  
-  /* Effects */
-  --sf-shadow-glow: 0 0 20px rgba(16, 185, 129, 0.18);
-  --sf-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --sf-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-}
+
 
 /* Typography System */
 :root {
