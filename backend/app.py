@@ -382,7 +382,8 @@ async def verify_otp(request: Request):
     created_at = otp_data.get("createdAt")
 
     # Check expiration (10 minutes)
-    age_minutes = (datetime.utcnow() - created_at).total_seconds() / 60
+    now = datetime.now(timezone.utc)
+    age_minutes = (now - created_at).total_seconds() / 60
     if age_minutes > 10:
         db.collection("otp").document(email).delete()
         raise HTTPException(400, "OTP expired")
