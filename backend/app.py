@@ -212,7 +212,7 @@ def otp_email_html(name, otp):
           <hr style="margin: 32px 0; border: none; border-top: 1px solid #e2e8f0;" />
 
           <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-            SmartFoodSave © {datetime.utcnow().year}<br/>
+            SmartFoodSave © {datetime.now(timezone.utc).year}<br/>
             AI‑powered food waste reduction for schools.
           </p>
 
@@ -276,7 +276,7 @@ async def save_settings(request: Request, user=Depends(authenticate)):
             "location": data.get("location", ""),
             "timezone": data.get("timezone", "GMT+3"),
             "showConfidenceRanges": data.get("showConfidenceRanges", False),
-            "updatedAt": datetime.utcnow(),
+            "updatedAt": datetime.now(timezone.utc),
         }
     )
 
@@ -292,7 +292,7 @@ async def save_settings(request: Request, user=Depends(authenticate)):
                 "femalePercent": data.get("femalePercent", 0),
                 "location": data.get("location", ""),
                 "isNew": False,
-                "updatedAt": datetime.utcnow(),
+                "updatedAt": datetime.now(timezone.utc),
             },
             merge=True,
         )
@@ -325,7 +325,7 @@ async def send_otp(request: Request):
         existing_data = existing.to_dict()
         last_sent = existing_data.get("lastSentAt")
         if last_sent:
-            seconds = (datetime.utcnow() - last_sent).total_seconds()
+            seconds = (datetime.now(timezone.utc) - last_sent).total_seconds()
             if seconds < 60:
                 raise HTTPException(
                     429,
@@ -338,8 +338,8 @@ async def send_otp(request: Request):
     # Save OTP in Firestore
     otp_ref.set({
         "otp": otp,
-        "createdAt": datetime.utcnow(),
-        "lastSentAt": datetime.utcnow(),
+        "createdAt": datetime.now(timezone.utc),
+        "lastSentAt": datetime.now(timezone.utc),
     })
 
     try:
@@ -403,7 +403,7 @@ async def verify_otp(request: Request):
                 "displayName": name,
                 "school": "",
                 "isNew": True,
-                "createdAt": datetime.utcnow(),
+                "createdAt": datetime.now(timezone.utc),
             }
         )
     except Exception as e:
@@ -459,7 +459,7 @@ async def save_daily_logs(request: Request, user=Depends(authenticate)):
 
     try:
         school = get_user_school(user["uid"])
-        log_date = data.get("date", datetime.utcnow().strftime("%Y-%m-%d"))
+        log_date = data.get("date", datetime.now(timezone.utc).strftime("%Y-%m-%d"))
         doc_id = f"{school}_{log_date}"
 
         ref = db.collection("daily_logs").document(doc_id)
@@ -470,7 +470,7 @@ async def save_daily_logs(request: Request, user=Depends(authenticate)):
             existing_logs = doc.to_dict().get("logs", [])
 
         new_log = {
-            "id": f"log-{int(datetime.utcnow().timestamp() * 1000)}",
+            "id": f"log-{int(datetime.now(timezone.utc).timestamp() * 1000)}",
             "date": log_date,
             "dayOfWeek": data.get("dayOfWeek"),
             "menuItems": data.get("menuItems", []),
@@ -478,7 +478,7 @@ async def save_daily_logs(request: Request, user=Depends(authenticate)):
             "prepared": data.get("prepared"),
             "served": data.get("served"),
             "leftovers": data.get("leftovers"),
-            "createdAt": datetime.utcnow().isoformat(),
+            "createdAt": datetime.now(timezone.utc).isoformat(),
         }
 
         print(f"✅ New log entry: {new_log}")
@@ -492,7 +492,7 @@ async def save_daily_logs(request: Request, user=Depends(authenticate)):
                 "school": school,
                 "date": log_date,
                 "logs": existing_logs,
-                "updatedAt": datetime.utcnow().isoformat(),
+                "updatedAt": datetime.now(timezone.utc).isoformat(),
             }
         )
 
@@ -530,7 +530,7 @@ async def save_schedule(request: Request, user=Depends(authenticate)):
     db.collection("school_schedules").document(school).set(
         {
             "schedule": schedule,
-            "updatedAt": datetime.utcnow(),
+            "updatedAt": datetime.now(timezone.utc),
         }
     )
 
@@ -854,7 +854,7 @@ def contact_email_html(name, email, message, phone=None):
           <hr style="margin: 32px 0; border: none; border-top: 1px solid #e2e8f0;" />
 
           <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-            SmartFoodSave Contact Form © {datetime.utcnow().year}
+            SmartFoodSave Contact Form © {datetime.now(timezone.utc).year}
           </p>
 
         </div>
@@ -929,7 +929,7 @@ async def send_contact_form(request: Request):
               </div>
               <hr style="margin: 32px 0; border: none; border-top: 1px solid #e2e8f0;" />
               <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-                SmartFoodSave © {datetime.utcnow().year}<br/>AI‑powered food waste reduction for schools.
+                SmartFoodSave © {datetime.now(timezone.utc).year}<br/>AI‑powered food waste reduction for schools.
               </p>
             </div>
           </body>
