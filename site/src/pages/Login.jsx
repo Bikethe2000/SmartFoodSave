@@ -91,7 +91,7 @@ export default function Login() {
       loginAttempts.count = 0;
       loginAttempts.lockedUntil = 0;
       window.location.href = "/dashboard";
-    } catch (err) {
+    } catch (error) {
       loginAttempts.count += 1;
 
       if (loginAttempts.count >= MAX_ATTEMPTS) {

@@ -101,7 +101,7 @@ export default function DataLogs() {
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Data Input & logs</h1>
+        <h1 className="text-2xl font-bold text-slate-800 mt-18">Data Input & logs</h1>
         <p className="text-sm text-slate-500">Record prepared vs served portions to retrain the AI models.</p>
       </div>
 

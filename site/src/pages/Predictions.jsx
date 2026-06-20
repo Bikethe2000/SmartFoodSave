@@ -64,7 +64,7 @@ export default function Predictions() {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-6 space-y-4 sf-text">
+    <div className="max-w-xl mx-auto p-6 space-y-4 sf-text mt-15">
       <h1 className="text-2xl font-bold sf-text">Food Waste Prediction</h1>
 
       <div className="space-y-3">

@@ -3,7 +3,7 @@ import { Utensils, LineChart, Sparkles, ClipboardList, Award } from "lucide-reac
 
 export default function Landing() {
   return (
-    <div className="min-h-screen sf-bg sf-text">
+    <div className="min-h-screen sf-bg sf-text mt-18">
       <div className="w-full">
         {/* HERO SECTION */}
         <section className="pt-16 pb-32" style={{ background: 'linear-gradient(to bottom, rgba(5, 150, 105, 0.05), var(--sf-bg))' }}>

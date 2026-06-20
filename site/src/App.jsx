@@ -18,7 +18,7 @@ import WeeklySchedulePro from "./pages/WeeklySchedule";
 import AboutUs from "./pages/AboutUs";
 import Documentation from "./pages/Documentation";
 import ContactForm from "./components/ContactForm";
-
+import ForgotPassword from "./pages/ForgotPassword";
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(api.isAuthenticated());
   const [settings, setSettings] = useState(null);
@@ -136,6 +136,7 @@ export default function App() {
           element={isAuthenticated ? <Navigate to="/dashboard" /> : <Signup />}
         />
       
+       <Route path="/forgot-password" element={isAuthenticated ? <Navigate to="/dashboard" /> : <ForgotPassword />} />
         {/* Fallback */}
          <Route path="*" element={<Navigate to="/" />} />
       </Routes>

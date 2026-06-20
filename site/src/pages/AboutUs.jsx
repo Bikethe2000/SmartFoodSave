@@ -2,7 +2,7 @@ import { Heart, Users, Lightbulb, Globe, ShieldCheck, Award, Calendar } from "lu
 
 export default function AboutUs() {
   return (
-    <div className="w-full pt-24 sf-bg sf-text">
+    <div className="w-full pt-24 sf-bg sf-text top-0 left-0">
       {/* HERO SECTION */}
       <section className="pb-16" style={{ background: 'linear-gradient(to bottom, rgba(5, 150, 105, 0.05), var(--sf-bg))' }}>
         <div className="max-w-6xl mx-auto px-6 text-center">

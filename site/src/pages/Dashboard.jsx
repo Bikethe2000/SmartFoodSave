@@ -190,7 +190,7 @@ export default function Dashboard() {
   };
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-fade-in mb-10 sf-text">
-      <h1 className="text-2xl font-bold sf-text">Dashboard</h1>
+      <h1 className="text-2xl font-bold sf-text mt-20">Dashboard</h1>
 
       <NearbyDonations />
 
