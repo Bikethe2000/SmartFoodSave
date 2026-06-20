@@ -149,25 +149,20 @@ def to_item(doc):
     return data
 
 
-def send_email_gmail(to: str, subject: str, body: str):
-    smtp_user = os.getenv("GMAIL_USER")
-    smtp_pass = os.getenv("GMAIL_APP_PASS")
+def send_email_resend(to: str, subject: str, html: str):
+    resend.api_key = os.getenv("RESEND_API_KEY")
 
-    if not smtp_user or not smtp_pass:
-        raise RuntimeError("GMAIL_USER or GMAIL_APP_PASS env var is not set")
-
-    msg = MIMEMultipart()
-    msg["From"] = smtp_user
-    msg["To"] = to
-    msg["Subject"] = subject
-    msg.attach(MIMEText(body, "html"))
-
-    with smtplib.SMTP("smtp.gmail.com", 587) as server:
-        server.starttls()
-        server.login(smtp_user, smtp_pass)
-        server.sendmail(smtp_user, to, msg.as_string())
-
-    print(f"✅ Gmail SMTP sent to {to}")
+    try:
+        resend.Emails.send({
+            "from": "SmartFoodSave <no-reply@smartfoodsave.xyz>",
+            "to": to,
+            "subject": subject,
+            "html": html,
+        })
+        print(f"✅ Resend email sent to {to}")
+    except Exception as e:
+        print(f"❌ Resend failed: {e}")
+        raise RuntimeError("Failed to send email via Resend")
 
 
 def otp_email_html(name, otp):
@@ -354,7 +349,7 @@ async def send_otp(request: Request):
 
         # Send OTP to the user's real email
         resend.Emails.send({
-            "from": "SmartFoodSave <onboarding@resend.dev>",
+            "from": "SmartFoodSave <no-reply@smartfoodsave.xyz>",
             "to": email,
             "subject": "Your SmartFoodSave Verification Code",
             "html": html,
@@ -812,7 +807,8 @@ async def get_nearby_donations(user=Depends(authenticate)):
 
     if donations:
         subject, body = donation_email(user_language, donations[0])
-        send_email_gmail(user_email, subject, body)
+        send_email_resend(user_email, subject, body)
+
 
     return {
         "donations": donations,
@@ -867,24 +863,25 @@ def contact_email_html(name, email, message, phone=None):
 
 
 def send_contact_emails(user_email: str, user_name: str, admin_body: str, user_body: str):
-    smtp_user = os.getenv("GMAIL_USER")
-    smtp_pass = os.getenv("GMAIL_APP_PASS")
+    resend.api_key = os.getenv("RESEND_API_KEY")
 
-    if not smtp_user or not smtp_pass:
-        raise RuntimeError("GMAIL_USER or GMAIL_APP_PASS env var is not set")
+    def send(to: str, subject: str, html: str):
+        try:
+            resend.Emails.send({
+                "from": "SmartFoodSave <no-reply@smartfoodsave.xyz>",
+                "to": to,
+                "subject": subject,
+                "html": html,
+            })
+            print(f"📨 Resend contact email sent to {to}")
+        except Exception as e:
+            print(f"❌ Failed to send contact email: {e}")
+            raise RuntimeError("Failed to send contact email")
 
-    def send(to: str, subject: str, body: str):
-        msg = MIMEMultipart()
-        msg["From"] = smtp_user
-        msg["To"] = to
-        msg["Subject"] = subject
-        msg.attach(MIMEText(body, "html"))
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls()
-            server.login(smtp_user, smtp_pass)
-            server.sendmail(smtp_user, to, msg.as_string())
+    # Send to admin
+    send("bikethe200.dev@gmail.com", "New Contact Form Submission", admin_body)
 
-    send(smtp_user, "New Contact Form Submission", admin_body)
+    # Send confirmation to user
     send(user_email, "We received your message - SmartFoodSave", user_body)
 
 
