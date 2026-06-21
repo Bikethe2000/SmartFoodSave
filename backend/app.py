@@ -39,6 +39,7 @@ ALLOWED_ORIGINS = [
     "https://food-waste-ai-bice.vercel.app",
     "http://food-waste-ai-bice.vercel.app",
     "http://localhost:5174",
+    "http://localhost:8081",
     "https://foodwasteai-production.up.railway.app",
     "https://www.smartfoodsave.xyz",
     "https://smartfoodsave.xyz",
